@@ -1,0 +1,15 @@
+node_modules
+dist
+dev-dist
+.DS_Store
+*.local
+.vite
+scratch_*
+scripts/.dl/
+scripts/.*.png
+
+# OCR 자산: scripts/setup-ocr.mjs 가 생성 (predev/prebuild 에서 자동).
+# 워커/코어는 node_modules 에서 복사되므로 무시하고,
+# 학습데이터(eng.traineddata.gz)만 커밋해 CI 빌드가 네트워크 없이 되게 한다.
+public/ocr/*
+!public/ocr/eng.traineddata.gz

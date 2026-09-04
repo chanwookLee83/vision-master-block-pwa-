@@ -1,0 +1,36 @@
+{
+  "name": "vision-master-block-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Vision Master Block 주간 치수 측정 관리 PWA",
+  "scripts": {
+    "setup:ocr": "node scripts/setup-ocr.mjs",
+    "predev": "node scripts/setup-ocr.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/setup-ocr.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "gen-icons": "node scripts/gen-icons.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:ocr": "node scripts/ocr-smoke.mjs",
+    "smoke:meta": "node scripts/meta-smoke.mjs",
+    "smoke:report": "node scripts/report-smoke.mjs",
+    "smoke:fs": "node scripts/fs-smoke.mjs",
+    "test:parse": "node scripts/parse-test.mjs"
+  },
+  "dependencies": {
+    "dexie": "^4.0.8",
+    "dexie-react-hooks": "^1.1.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "tesseract.js": "^5.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "puppeteer-core": "^23.11.1",
+    "vite": "^5.4.8",
+    "vite-plugin-pwa": "^0.20.5"
+  }
+}
