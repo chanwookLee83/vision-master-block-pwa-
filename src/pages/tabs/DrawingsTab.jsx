@@ -157,7 +157,6 @@ export default function DrawingsTab({ itemId }) {
             <div>
               {selected ? (
                 <MarkerEditor
-                  key={selected.id}
                   marker={selected}
                   roiMode={roiMode}
                   ocr={ocr}
@@ -222,6 +221,18 @@ function MarkerEditor({
   onChange, onToggleRoi, onClearRoi, onRunOcr, onOcrApplied, onDismissOcr, onDelete,
 }) {
   const [m, setM] = useState(marker);
+  // 다른 번호를 선택했을 때만 편집 상태를 갈아끼운다.
+  // (예전엔 key={marker.id} 로 컴포넌트를 통째로 remount 했는데, 그러면 입력창 DOM 이
+  //  새로 만들어지면서 브라우저가 한글 IME 를 영문으로 되돌려 버린다. 같은 DOM 을
+  //  유지하면 사용자가 고른 키보드 언어가 그대로 유지된다.)
+  const lastId = useRef(marker.id);
+  useEffect(() => {
+    if (marker.id !== lastId.current) {
+      lastId.current = marker.id;
+      setM(marker);
+    }
+  }, [marker]);
+
   const set = (patch) => {
     const next = { ...m, ...patch };
     setM(next);
@@ -254,7 +265,7 @@ function MarkerEditor({
 
       <label className="field">
         <span>치수 이름 / 위치</span>
-        <input value={m.name || ''} onChange={(e) => set({ name: e.target.value })} placeholder="예: Hole1-Hole2 간 거리" />
+        <input lang="ko" value={m.name || ''} onChange={(e) => set({ name: e.target.value })} placeholder="예: Hole1-Hole2 간 거리" />
       </label>
 
       <label className="field" style={{ marginTop: 10 }}>
