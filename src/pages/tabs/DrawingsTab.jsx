@@ -262,27 +262,25 @@ function MarkerEditor({
         <DecimalInput value={m.nominal ?? ''} onChange={(n) => set({ nominal: n })} placeholder="예: 27.888" />
       </label>
 
-      <div className="grid cols-2" style={{ marginTop: 10 }}>
-        <label className="field">
-          <span>단위</span>
-          <SelectInput
-            value={m.unit ?? 'mm'}
-            onChange={(v) => set({ unit: v })}
-            options={unitOptions}
-            labelOf={unitLabel}
-            promptText="단위 직접 입력"
-          />
-        </label>
-        <label className="field">
-          <span>계측기</span>
-          <SelectInput
-            value={m.gauge ?? ''}
-            onChange={(v) => set({ gauge: v })}
-            options={gaugeOptions}
-            promptText="계측기 직접 입력"
-          />
-        </label>
-      </div>
+      <label className="field" style={{ marginTop: 10 }}>
+        <span>단위</span>
+        <SelectInput
+          value={m.unit ?? 'mm'}
+          onChange={(v) => set({ unit: v })}
+          options={unitOptions}
+          labelOf={unitLabel}
+          promptText="단위 직접 입력"
+        />
+      </label>
+      <label className="field" style={{ marginTop: 10 }}>
+        <span>계측기</span>
+        <SelectInput
+          value={m.gauge ?? ''}
+          onChange={(v) => set({ gauge: v })}
+          options={gaugeOptions}
+          promptText="계측기 직접 입력"
+        />
+      </label>
       {onApplyMeta && (
         <button
           type="button"

@@ -94,7 +94,7 @@ export default function MarkersTab({ itemId }) {
                   </td>
                   <td>
                     <SelectInput
-                      style={{ width: 128 }}
+                      style={{ width: 150 }}
                       value={m.unit ?? 'mm'}
                       onChange={(v) => updateMarker(m.id, { unit: v })}
                       options={unitOptions}

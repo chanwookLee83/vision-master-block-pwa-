@@ -1,5 +1,6 @@
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { ToastProvider } from './components/ui.jsx';
+import UpdatePrompt from './components/UpdatePrompt.jsx';
 import ItemList from './pages/ItemList.jsx';
 import ItemForm from './pages/ItemForm.jsx';
 import ItemDetail from './pages/ItemDetail.jsx';
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="*" element={<div className="panel">페이지를 찾을 수 없습니다. <Link to="/">홈으로</Link></div>} />
         </Routes>
       </div>
+      <UpdatePrompt />
     </ToastProvider>
   );
 }

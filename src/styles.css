@@ -35,7 +35,7 @@ button { font-family: inherit; }
 
 /* ---- 레이아웃 ---- */
 .app {
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 16px 96px;
 }
@@ -198,8 +198,8 @@ tr.row-ng td { background: #fef7f6; }
 .cell-ng { color: var(--ng); font-weight: 800; }
 
 /* ---- 도면 마커 편집기 ---- */
-.annotator { display: grid; grid-template-columns: 1fr 300px; gap: 16px; }
-@media (max-width: 900px) { .annotator { grid-template-columns: 1fr; } }
+.annotator { display: grid; grid-template-columns: 1fr 360px; gap: 16px; }
+@media (max-width: 980px) { .annotator { grid-template-columns: 1fr; } }
 
 /* ---- 주간 측정 레이아웃: 기본 세로 배치(도면 위 / 표 아래, 표는 전체 폭) ---- */
 .measure-layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
@@ -298,6 +298,18 @@ tr.row-ng td.mv-cell { background: #fde7e6; }
   background: #1c2330; color: #fff; padding: 10px 18px; border-radius: 999px;
   font-size: 14px; z-index: 100; box-shadow: var(--shadow);
 }
+
+.update-bar {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  width: min(460px, calc(100vw - 32px));
+  background: var(--panel); border: 1px solid var(--line-strong);
+  border-radius: 12px; box-shadow: var(--shadow);
+  padding: 14px 16px; z-index: 120;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.update-bar-body b { display: block; margin-bottom: 6px; font-size: 14px; }
+.update-bar-list { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.update-bar-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .fab {
   position: fixed; right: 20px; bottom: 20px;
