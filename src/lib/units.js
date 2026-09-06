@@ -2,7 +2,26 @@
 // 실제 선택지는 "기본 목록" + "이미 마커에 입력된 값"을 합쳐서 datalist 로 제공한다.
 // (한 번 입력해두면 다음부터 목록에 나타남)
 
-export const DEFAULT_UNITS = ['mm', 'µm', 'cm', '°', 'inch'];
+export const DEFAULT_UNITS = ['mm', 'µm', 'cm', 'm', 'inch', '°', "'", '"', 'Ø', 'R', 'C', 'rad', '%'];
+
+// 리스트 박스에 보여줄 한글 설명 (값 자체는 기호/약어 그대로 저장)
+export const UNIT_LABELS = {
+  mm: 'mm (밀리미터)',
+  µm: 'µm (마이크로미터)',
+  cm: 'cm (센티미터)',
+  m: 'm (미터)',
+  inch: 'inch (인치)',
+  '°': '° (각도 · 도)',
+  "'": "' (각도 · 분)",
+  '"': '" (각도 · 초)',
+  'Ø': 'Ø (파이 · 지름)',
+  R: 'R (반지름)',
+  C: 'C (모따기)',
+  rad: 'rad (라디안)',
+  '%': '% (백분율)',
+};
+
+export const unitLabel = (u) => UNIT_LABELS[u] || u;
 
 export const DEFAULT_GAUGES = [
   '버니어캘리퍼스',

@@ -24,6 +24,36 @@ export function ListInput({ value, onChange, options = [], ...props }) {
 }
 
 /**
+ * 리스트 박스(select) + "직접 입력…" 옵션.
+ * props: value, onChange(string), options: string[], labelOf(o)=>표시문자열,
+ *        promptText(직접 입력 시 프롬프트 문구), 나머지는 select 로 전달.
+ */
+export function SelectInput({ value, onChange, options = [], labelOf = (o) => o, promptText = '직접 입력', ...props }) {
+  const CUSTOM = '__custom__';
+  // 목록에 없는 현재 값은 맨 앞에 끼워 넣어 보이게 한다.
+  const opts = value && !options.includes(value) ? [value, ...options] : options;
+  return (
+    <select
+      value={value || ''}
+      onChange={(e) => {
+        const v = e.target.value;
+        if (v === CUSTOM) {
+          const t = window.prompt(promptText, value || '');
+          if (t && t.trim()) onChange(t.trim());
+          return;
+        }
+        onChange(v);
+      }}
+      {...props}
+    >
+      {!value && <option value="" disabled>(선택)</option>}
+      {opts.map((o) => <option key={o} value={o}>{labelOf(o)}</option>)}
+      <option value={CUSTOM}>+ 직접 입력…</option>
+    </select>
+  );
+}
+
+/**
  * 소수점 입력용 컨트롤드 인풋.
  * type=number 는 "27." 같은 입력 중간 상태에서 value 가 빈 문자열이 되어
  * 컨트롤드+숫자 저장과 함께 쓰면 글자가 씹힌다. 여기서는 표시용 문자열을

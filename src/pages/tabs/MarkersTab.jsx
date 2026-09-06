@@ -1,8 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, updateMarker, deleteMarker } from '../../lib/db.js';
 import { limitsOf, fmt } from '../../lib/tol.js';
-import { Empty, useToast, DecimalInput, ListInput } from '../../components/ui.jsx';
-import { DEFAULT_UNITS, DEFAULT_GAUGES, mergeOptions } from '../../lib/units.js';
+import { Empty, useToast, DecimalInput, SelectInput } from '../../components/ui.jsx';
+import { DEFAULT_UNITS, DEFAULT_GAUGES, mergeOptions, unitLabel } from '../../lib/units.js';
 
 export default function MarkersTab({ itemId }) {
   const toast = useToast();
@@ -93,21 +93,22 @@ export default function MarkersTab({ itemId }) {
                     )}
                   </td>
                   <td>
-                    <ListInput
-                      style={{ width: 78 }}
+                    <SelectInput
+                      style={{ width: 128 }}
                       value={m.unit ?? 'mm'}
                       onChange={(v) => updateMarker(m.id, { unit: v })}
                       options={unitOptions}
-                      placeholder="mm"
+                      labelOf={unitLabel}
+                      promptText="단위 직접 입력"
                     />
                   </td>
                   <td>
-                    <ListInput
+                    <SelectInput
                       style={{ width: 200 }}
                       value={m.gauge ?? ''}
                       onChange={(v) => updateMarker(m.id, { gauge: v })}
                       options={gaugeOptions}
-                      placeholder="(계측기)"
+                      promptText="계측기 직접 입력"
                     />
                   </td>
                   <td>

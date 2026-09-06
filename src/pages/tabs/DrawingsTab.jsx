@@ -2,9 +2,9 @@ import { useRef, useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, addDrawing, deleteDrawing, addMarker, updateMarker, deleteMarker, applyMarkerMeta } from '../../lib/db.js';
 import { tolText } from '../../lib/tol.js';
-import { Empty, useToast, readImageFile, DecimalInput, ListInput } from '../../components/ui.jsx';
+import { Empty, useToast, readImageFile, DecimalInput, SelectInput } from '../../components/ui.jsx';
 import { readDimensionFromRoi } from '../../lib/ocr.js';
-import { DEFAULT_UNITS, DEFAULT_GAUGES, mergeOptions } from '../../lib/units.js';
+import { DEFAULT_UNITS, DEFAULT_GAUGES, mergeOptions, unitLabel } from '../../lib/units.js';
 import MarkerCanvas from '../../components/MarkerCanvas.jsx';
 
 export default function DrawingsTab({ itemId }) {
@@ -265,20 +265,21 @@ function MarkerEditor({
       <div className="grid cols-2" style={{ marginTop: 10 }}>
         <label className="field">
           <span>단위</span>
-          <ListInput
+          <SelectInput
             value={m.unit ?? 'mm'}
             onChange={(v) => set({ unit: v })}
             options={unitOptions}
-            placeholder="mm"
+            labelOf={unitLabel}
+            promptText="단위 직접 입력"
           />
         </label>
         <label className="field">
           <span>계측기</span>
-          <ListInput
+          <SelectInput
             value={m.gauge ?? ''}
             onChange={(v) => set({ gauge: v })}
             options={gaugeOptions}
-            placeholder="예: 마이크로미터"
+            promptText="계측기 직접 입력"
           />
         </label>
       </div>
