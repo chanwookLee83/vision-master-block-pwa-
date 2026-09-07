@@ -168,8 +168,8 @@ function printDoc(title, body) {
 <style>
   * { box-sizing: border-box; }
   body { font: 12px/1.5 "Malgun Gothic","Apple SD Gothic Neo",sans-serif; color:#111; margin:24px; }
-  h1 { font-size:18px; margin:0 0 12px; }
-  table { border-collapse:collapse; width:100%; margin-bottom:14px; }
+  h1 { font-size:17px; margin:0 0 8px; }
+  table { border-collapse:collapse; width:100%; margin-bottom:8px; }
   th,td { border:1px solid #999; padding:5px 7px; text-align:left; }
   table.meta th { background:#f0f0f0; width:80px; white-space:nowrap; }
   table.data thead th { background:#eee; text-align:center; font-size:11px; }
@@ -188,11 +188,11 @@ function printDoc(title, body) {
   .summary .verdict.ok { background:#eaf6ec; color:#1e7e34; }
   .summary .verdict.ng { background:#fdecea; color:#c0392b; }
   footer { margin-top:16px; font-size:11px; color:#666; }
-  h2.dwg-h { font-size:14px; margin:10px 0 6px; break-after:avoid; }
-  .dwg { margin:0 0 10px; padding:0; }
-  .dwg figcaption { font-weight:700; margin-bottom:4px; break-after:avoid; }
+  h2.dwg-h { font-size:13px; margin:4px 0 4px; }
+  .dwg { margin:0 0 8px; padding:0; }
+  .dwg figcaption { font-weight:700; margin-bottom:3px; }
   .dwg-wrap { position:relative; display:inline-block; max-width:100%; border:1px solid #999; }
-  .dwg-wrap img { display:block; max-width:100%; height:auto; max-height:165mm; }
+  .dwg-wrap img { display:block; max-width:100%; height:auto; max-height:135mm; }
   .mk { position:absolute; transform:translate(-50%,-50%); box-sizing:border-box;
         min-width:16px; height:16px; padding:0 3px; border-radius:8px; border:1px solid #fff;
         background:#37718e; color:#fff; font-size:9px; font-weight:700; line-height:14px; text-align:center; }
