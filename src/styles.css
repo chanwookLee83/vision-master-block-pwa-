@@ -191,6 +191,15 @@ tbody tr:last-child td { border-bottom: none; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 td input { padding: 6px 8px; }
 
+/* 치수표: 헤더·데이터 모두 가운데 정렬 */
+.marker-table th,
+.marker-table td,
+.marker-table td.num,
+.marker-table th.num { text-align: center; }
+.marker-table td input,
+.marker-table td select,
+.marker-table td .right { text-align: center; }
+
 .pill-ok { background: var(--ok-bg); color: var(--ok); font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
 .pill-ng { background: var(--ng-bg); color: var(--ng); font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
 tr.row-ng td { background: #fef7f6; }

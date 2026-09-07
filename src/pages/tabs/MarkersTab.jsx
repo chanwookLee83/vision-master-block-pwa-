@@ -49,7 +49,7 @@ export default function MarkersTab({ itemId }) {
           : '읽기 전용입니다. 값을 고치려면 오른쪽 위 "편집" 을 누르세요. (기준치수·공차는 도면 · 번호 지정 탭에서도 입력할 수 있습니다)'}
       </p>
       <div className="table-wrap">
-        <table>
+        <table className="marker-table">
           <thead>
             <tr>
               <th>No</th>
