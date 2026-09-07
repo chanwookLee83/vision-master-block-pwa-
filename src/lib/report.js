@@ -188,11 +188,11 @@ function printDoc(title, body) {
   .summary .verdict.ok { background:#eaf6ec; color:#1e7e34; }
   .summary .verdict.ng { background:#fdecea; color:#c0392b; }
   footer { margin-top:16px; font-size:11px; color:#666; }
-  h2.dwg-h { font-size:14px; margin:18px 0 8px; }
-  .dwg { margin:0 0 12px; padding:0; page-break-inside:avoid; }
-  .dwg figcaption { font-weight:700; margin-bottom:4px; }
+  h2.dwg-h { font-size:14px; margin:10px 0 6px; break-after:avoid; }
+  .dwg { margin:0 0 10px; padding:0; }
+  .dwg figcaption { font-weight:700; margin-bottom:4px; break-after:avoid; }
   .dwg-wrap { position:relative; display:inline-block; max-width:100%; border:1px solid #999; }
-  .dwg-wrap img { display:block; max-width:100%; height:auto; }
+  .dwg-wrap img { display:block; max-width:100%; height:auto; max-height:165mm; }
   .mk { position:absolute; transform:translate(-50%,-50%); box-sizing:border-box;
         min-width:16px; height:16px; padding:0 3px; border-radius:8px; border:1px solid #fff;
         background:#37718e; color:#fff; font-size:9px; font-weight:700; line-height:14px; text-align:center; }
