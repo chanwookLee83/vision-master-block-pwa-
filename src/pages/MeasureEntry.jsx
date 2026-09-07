@@ -371,21 +371,19 @@ export default function MeasureEntry() {
             <p className="muted">폴더에 파일이 없습니다.</p>
           )}
           {folderView.files && folderView.files.length > 0 && (
-            <div className="table-wrap">
-              <table className="sess-table">
-                <thead><tr><th>파일</th><th>크기</th><th>수정</th><th></th></tr></thead>
-                <tbody>
-                  {folderView.files.map((f) => (
-                    <tr key={f.name}>
-                      <td style={{ textAlign: 'left', wordBreak: 'break-all' }}>{f.name}</td>
-                      <td className="nowrap">{f.size ? `${Math.max(1, Math.round(f.size / 1024))} KB` : '-'}</td>
-                      <td className="nowrap">{f.lastModified ? new Date(f.lastModified).toLocaleString('ko-KR') : '-'}</td>
-                      <td><button className="btn sm" onClick={() => downloadSaved(f.name)}>받기</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <table className="sess-table file-table">
+              <thead><tr><th className="fname">파일</th><th>크기</th><th>수정</th><th></th></tr></thead>
+              <tbody>
+                {folderView.files.map((f) => (
+                  <tr key={f.name}>
+                    <td className="fname">{f.name}</td>
+                    <td>{f.size ? `${Math.max(1, Math.round(f.size / 1024))} KB` : '-'}</td>
+                    <td>{f.lastModified ? new Date(f.lastModified).toLocaleString('ko-KR') : '-'}</td>
+                    <td><button className="btn sm" onClick={() => downloadSaved(f.name)}>받기</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
           <p className="hint" style={{ marginTop: 10 }}>
             브라우저는 탐색기를 직접 열 수 없어 파일 목록만 보여줍니다.
