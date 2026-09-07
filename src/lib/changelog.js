@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.3.5';
+export const APP_VERSION = '1.4.0';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.4.0',
+    date: '2026-09-07',
+    items: [
+      '앱 이름을 "측정관리 이력관리 시스템"으로 변경 (설치 시 창 제목 포함)',
+      '앱/탭 아이콘을 새 색상의 자(눈금) 도안으로 교체, 잘림 현상 수정',
+    ],
+  },
   {
     version: '1.3.5',
     date: '2026-09-07',

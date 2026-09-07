@@ -14,9 +14,9 @@ export default defineConfig({
       includeAssets: ['favicon.svg'],
       manifest: {
         id: './',
-        name: 'Vision Master Block 측정관리',
-        short_name: 'VMB 측정',
-        description: 'Vision Master Block 도면 번호 지정 · 주간 치수 측정 · 공차 OK/NG 자동 판정 (오프라인)',
+        name: '측정관리 이력관리 시스템',
+        short_name: '측정관리',
+        description: '도면 번호 지정 · 주간 치수 측정 · 공차 OK/NG 자동 판정 · 이력 관리 (오프라인)',
         lang: 'ko',
         dir: 'ltr',
         start_url: './',
@@ -28,8 +28,9 @@ export default defineConfig({
         background_color: '#0f172a',
         theme_color: '#37718e',
         icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
