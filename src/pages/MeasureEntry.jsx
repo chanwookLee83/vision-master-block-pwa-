@@ -4,7 +4,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, setReading, getSetting } from '../lib/db.js';
 import { judge, deviationOf, limitsOf, tolText, fmt, isoWeekKey, nowTimeStr } from '../lib/tol.js';
 import { Crumbs, useToast, DecimalInput } from '../components/ui.jsx';
-import { saveFile, safeName, getSaveDir, writeToDir, dataUrlToBlob } from '../lib/fs.js';
+import { safeName, getSaveDir, writeToDir, dataUrlToBlob, download, fsSupported } from '../lib/fs.js';
+import { makeZip } from '../lib/zip.js';
 import { sessionCsv, sessionReportHtml, openPrint } from '../lib/report.js';
 import { exportAll } from '../lib/backup.js';
 import MarkerCanvas from '../components/MarkerCanvas.jsx';
@@ -106,27 +107,53 @@ export default function MeasureEntry() {
   const baseName = () =>
     `측정_${safeName(item.partNo || 'item')}_${safeName(session.weekKey || session.date || '')}`;
 
-  // 저장 폴더에 도면 이미지도 함께 저장. 반환: 저장한 장수
+  // 도면 이미지 파일 목록 [{ name, blob }]
+  function drawingImageFiles() {
+    return drawings
+      .filter((d) => d.dataUrl)
+      .map((d, i) => {
+        const blob = dataUrlToBlob(d.dataUrl);
+        const ext = (blob.type || '').includes('png') ? 'png' : 'jpg';
+        const label = d.name ? `_${safeName(d.name)}` : '';
+        return { name: `${baseName()}_도면${i + 1}${label}.${ext}`, blob };
+      });
+  }
+
   async function writeDrawingImages(dir) {
     let n = 0;
-    for (const d of drawings) {
-      if (!d.dataUrl) continue;
-      const blob = dataUrlToBlob(d.dataUrl);
-      const ext = (blob.type || '').includes('png') ? 'png' : 'jpg';
-      const label = d.name ? `_${safeName(d.name)}` : '';
-      try { await writeToDir(dir, `${baseName()}_도면${n + 1}${label}.${ext}`, blob); n++; } catch { /* skip */ }
+    for (const f of drawingImageFiles()) {
+      try { await writeToDir(dir, f.name, f.blob); n++; } catch { /* skip */ }
     }
     return n;
   }
 
   async function exportCsv() {
-    const res = await saveFile(`${baseName()}.csv`, sessionCsv(item, session, markers, valueOf), 'text/csv;charset=utf-8');
-    if (res.target === 'folder') {
-      const dir = await getSaveDir();
-      const n = dir ? await writeDrawingImages(dir) : 0;
-      toast(`${res.dir} 폴더에 저장했습니다${n ? ` · 도면 ${n}장` : ''}`);
+    const csvBlob = sessionCsv(item, session, markers, valueOf);
+    const imgs = drawingImageFiles();
+    const dir = fsSupported() ? await getSaveDir({ prompt: true }) : null;
+
+    if (dir) {
+      try {
+        await writeToDir(dir, `${baseName()}.csv`, csvBlob);
+        const n = await writeDrawingImages(dir);
+        toast(`${dir.name} 폴더에 저장했습니다${n ? ` · 도면 ${n}장` : ''}`);
+      } catch (e) {
+        toast('폴더 저장 실패: ' + e.message);
+      }
+      return;
+    }
+
+    // 다운로드: 도면이 있으면 CSV+도면을 ZIP 하나로 묶어 받는다
+    if (imgs.length) {
+      const zip = await makeZip([
+        { name: `${baseName()}.csv`, data: csvBlob },
+        ...imgs.map((f) => ({ name: f.name, data: f.blob })),
+      ]);
+      download(`${baseName()}.zip`, zip, 'application/zip');
+      toast(`CSV + 도면 ${imgs.length}장을 ZIP 으로 내려받았습니다`);
     } else {
-      toast('CSV를 내려받았습니다 (도면 이미지는 인쇄/PDF 에 포함됩니다)');
+      download(`${baseName()}.csv`, csvBlob);
+      toast('CSV를 내려받았습니다');
     }
   }
 
