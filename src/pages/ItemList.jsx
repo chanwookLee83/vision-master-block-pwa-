@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../lib/db.js';
@@ -9,11 +9,22 @@ export default function ItemList() {
   const nav = useNavigate();
   const toast = useToast();
   const fileRef = useRef(null);
+  const [q, setQ] = useState('');
 
   const items = useLiveQuery(() => db.items.orderBy('createdAt').reverse().toArray(), []);
   const drawings = useLiveQuery(() => db.drawings.toArray(), []);
   const markers = useLiveQuery(() => db.markers.toArray(), []);
   const sessions = useLiveQuery(() => db.sessions.toArray(), []);
+
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return items || [];
+    return (items || []).filter((it) =>
+      [it.partNo, it.partName, it.machineNo]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(s))
+    );
+  }, [items, q]);
 
   if (!items) return null;
 
@@ -39,13 +50,25 @@ export default function ItemList() {
     <>
       <div className="panel">
         <div className="btn-row" style={{ justifyContent: 'space-between' }}>
-          <h2 style={{ margin: 0 }}>품목 ({items.length})</h2>
+          <h2 style={{ margin: 0 }}>품목 ({q.trim() ? `${filtered.length}/${items.length}` : items.length})</h2>
           <div className="btn-row">
             <button className="btn sm" onClick={downloadBackup}>백업 내보내기</button>
             <button className="btn sm" onClick={() => fileRef.current.click()}>가져오기</button>
             <input ref={fileRef} type="file" accept="application/json" hidden onChange={onImport} />
           </div>
         </div>
+        {items.length > 0 && (
+          <div className="search-box" style={{ marginTop: 12 }}>
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="품번 · 품명 · 호기 검색"
+              aria-label="품목 검색"
+            />
+            {q && <button className="btn sm ghost" onClick={() => setQ('')}>지우기</button>}
+          </div>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -54,9 +77,15 @@ export default function ItemList() {
             품번 · 품명 · 호기를 등록하고 도면을 올려 번호를 지정하세요.
           </Empty>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="panel">
+          <Empty title="검색 결과가 없습니다">
+            &lsquo;{q}&rsquo; 와(과) 일치하는 품번 · 품명 · 호기가 없습니다.
+          </Empty>
+        </div>
       ) : (
         <div>
-          {items.map((it) => (
+          {filtered.map((it) => (
             <div key={it.id} className="item-card" onClick={() => nav(`/items/${it.id}`)}>
               {thumbOf(it.id) ? (
                 <img className="thumb" src={thumbOf(it.id)} alt="" />

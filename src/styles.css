@@ -5,15 +5,16 @@
   --line-strong: #cfd4de;
   --text: #1c2330;
   --muted: #6b7280;
-  --brand: #4f46e5;
-  --brand-weak: #eef0fe;
+  --brand: #37718e;          /* 차분한 스틸·청록 (기존 보라 #4f46e5 대체) */
+  --brand-weak: #e9f1f4;
+  --brand-strong: #2c5b73;   /* 버튼 hover 등 진한 톤 */
   --ok: #0f9d58;
   --ok-bg: #e5f6ec;
   --ng: #d9342b;
   --ng-bg: #fdeceb;
   --warn: #b7791f;
-  --field-bg: #f4f7ff;        /* 입력란 배경 (연한 파랑) */
-  --field-border: #b9c2e8;    /* 입력란 테두리 */
+  --field-bg: #f3f7f8;        /* 입력란 배경 (아주 옅은 청회색) */
+  --field-border: #c1cdd2;    /* 입력란 테두리 */
   --beige-bg: #faf5ea;        /* 측정 칼럼 배경 (옅은 베이지) */
   --beige-tint: #f2e7cf;      /* 측정 헤더 배경 */
   --beige-border: #d8c39a;    /* 측정 입력칸 테두리 */
@@ -108,7 +109,7 @@ input, select, textarea {
   outline: none;
 }
 input::placeholder, textarea::placeholder { color: #9aa3b2; }
-input:hover, select:hover, textarea:hover { border-color: #93a0d4; }
+input:hover, select:hover, textarea:hover { border-color: #93a8b0; }
 input:focus, select:focus, textarea:focus {
   border-color: var(--brand);
   background: #fff;
@@ -144,7 +145,7 @@ textarea { resize: vertical; min-height: 64px; }
 }
 .btn:hover { background: #f7f8fa; }
 .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
-.btn.primary:hover { background: #4338ca; }
+.btn.primary:hover { background: var(--brand-strong); }
 .btn.danger { color: var(--ng); border-color: #f2c4c1; }
 .btn.danger:hover { background: var(--ng-bg); }
 .btn.ghost { border-color: transparent; background: transparent; }
@@ -166,6 +167,10 @@ textarea { resize: vertical; min-height: 64px; }
   white-space: nowrap;
 }
 .tabs button.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+/* ---- 검색 ---- */
+.search-box { display: flex; gap: 8px; align-items: center; }
+.search-box input { flex: 1; }
 
 /* ---- 리스트 ---- */
 .item-card {
