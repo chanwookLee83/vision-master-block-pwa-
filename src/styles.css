@@ -14,6 +14,10 @@
   --warn: #b7791f;
   --field-bg: #f4f7ff;        /* 입력란 배경 (연한 파랑) */
   --field-border: #b9c2e8;    /* 입력란 테두리 */
+  --beige-bg: #faf5ea;        /* 측정 칼럼 배경 (옅은 베이지) */
+  --beige-tint: #f2e7cf;      /* 측정 헤더 배경 */
+  --beige-border: #d8c39a;    /* 측정 입력칸 테두리 */
+  --beige-strong: #a9812f;    /* 측정 강조 텍스트 */
   --radius: 12px;
   --shadow: 0 1px 3px rgba(20, 24, 40, 0.08), 0 6px 20px rgba(20, 24, 40, 0.06);
 }
@@ -60,7 +64,13 @@ button { font-family: inherit; }
   gap: 8px;
 }
 .topbar .brand img { width: 26px; height: 26px; border-radius: 7px; }
+.topbar .brand span { white-space: nowrap; }
 .topbar .spacer { flex: 1; }
+@media (max-width: 520px) {
+  .topbar { gap: 8px; }
+  .topbar .brand { font-size: 13px; }
+  .topbar .brand img { width: 22px; height: 22px; }
+}
 .crumbs { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
 .crumbs a { color: var(--muted); }
 .crumbs b { color: var(--text); }
@@ -107,9 +117,10 @@ input[type="number"] { font-variant-numeric: tabular-nums; }
 input[type="date"], input[type="time"] { color-scheme: light; }
 textarea { resize: vertical; min-height: 64px; }
 
-/* 측정값 입력칸 — 파란 칼럼 위에서 흰 박스로 도드라지게, 판정 시 색상 */
-.mv { background: #fff; border: 2px solid var(--brand); font-weight: 700; }
-.mv::placeholder { color: #9aa8de; font-weight: 400; }
+/* 측정값 입력칸 — 베이지 칼럼 위에서 흰 박스로 도드라지게, 판정 시 색상 */
+.mv { background: #fff; border: 2px solid var(--beige-border); font-weight: 700; }
+.mv::placeholder { color: #b8a271; font-weight: 400; }
+.mv:focus { background: #fff; border-color: var(--beige-strong); box-shadow: 0 0 0 3px rgba(169, 129, 47, 0.22); }
 .mv-ok { background: var(--ok-bg); border-color: var(--ok); color: #0a6b3d; font-weight: 700; }
 .mv-ng { background: var(--ng-bg); border-color: var(--ng); color: #9e211a; font-weight: 700; }
 .mv-ok:focus { background: #fff; border-color: var(--ok); box-shadow: 0 0 0 3px rgba(15, 157, 88, 0.22); }
@@ -221,14 +232,22 @@ tr.row-ng td { background: #fef7f6; }
 .measure-cap {
   display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
   padding: 8px 12px; margin-bottom: 8px;
-  background: var(--brand-weak); border: 1px solid #d4d8f7; border-radius: 9px;
+  background: var(--beige-bg); border: 1px solid var(--beige-border); border-radius: 9px;
   font-size: 13px; color: var(--muted);
 }
 .measure-cap b { color: var(--text); }
-.measure-cap .measure-cap-hint { margin-left: auto; color: var(--brand); font-weight: 600; }
+.measure-cap .measure-cap-hint { margin-left: auto; color: var(--beige-strong); font-weight: 600; }
 
-.measure-table th.mv-head { background: var(--brand); color: #fff; }
-.measure-table td.mv-cell { background: #eef1ff; }
+/* 측정 표: 헤더·데이터 모두 가운데 정렬 */
+.measure-table th,
+.measure-table td,
+.measure-table th.num,
+.measure-table td.num { text-align: center; }
+.measure-table td .right { text-align: center; }
+.measure-table td.muted { text-align: left; }
+
+.measure-table th.mv-head { background: var(--beige-tint); color: var(--text); }
+.measure-table td.mv-cell { background: var(--beige-bg); }
 tr.row-ng td.mv-cell { background: #fde7e6; }
 .marker-no {
   display: inline-flex; align-items: center; justify-content: center;

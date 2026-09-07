@@ -14,7 +14,7 @@ export default function App() {
       <div className="topbar">
         <Link to="/" className="brand">
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" />
-          <span>VMB 측정관리</span>
+          <span>측정관리 이력관리 시스템</span>
         </Link>
         <span className="spacer" />
         <button className="btn sm" onClick={() => nav('/')}>품목 목록</button>

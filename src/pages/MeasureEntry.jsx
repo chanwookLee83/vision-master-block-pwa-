@@ -221,7 +221,7 @@ function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker }
       <div className="measure-cap">
         <span>계측기 <b>{gauges.join(', ') || '-'}</b></span>
         <span>단위 <b>{units.join(', ')}</b></span>
-        <span className="measure-cap-hint">→ 파란색 <b>측정값</b> 칸에 입력하세요</span>
+        <span className="measure-cap-hint">→ <b>측정값</b> 칸(베이지색)에 입력하세요</span>
       </div>
       <div className="table-wrap">
         <table className="measure-table">
