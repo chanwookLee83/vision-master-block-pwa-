@@ -4,6 +4,7 @@ import { db, addDrawing, deleteDrawing, addMarker, updateMarker, deleteMarker, a
 import { tolText } from '../../lib/tol.js';
 import { Empty, useToast, readImageFile, DecimalInput, SelectInput } from '../../components/ui.jsx';
 import { readDimensionFromRoi } from '../../lib/ocr.js';
+import { requireAdmin } from '../../lib/admin.js';
 import { DEFAULT_UNITS, DEFAULT_GAUGES, mergeOptions, unitLabel } from '../../lib/units.js';
 import MarkerCanvas from '../../components/MarkerCanvas.jsx';
 
@@ -89,6 +90,7 @@ export default function DrawingsTab({ itemId, onComplete }) {
   }
 
   async function removeDrawing(d) {
+    if (!(await requireAdmin('도면 삭제'))) return;
     if (!confirm(`"${d.name}" 도면과 이 도면의 번호를 삭제할까요?`)) return;
     await deleteDrawing(d.id);
     toast('도면을 삭제했습니다');

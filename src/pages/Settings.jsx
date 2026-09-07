@@ -6,6 +6,7 @@ import {
   saveDirName, writeToDir, ensurePermission, probeDir,
 } from '../lib/fs.js';
 import { exportAll, downloadBackup, importAll } from '../lib/backup.js';
+import { hasAdminPassword, setAdminPassword, verifyAdminPassword, clearAdminPassword } from '../lib/admin.js';
 import { Crumbs, useToast } from '../components/ui.jsx';
 
 export default function Settings() {
@@ -17,11 +18,17 @@ export default function Settings() {
   const [status, setStatus] = useState(null); // { kind:'ok'|'err'|'info', text }
   const supported = fsSupported();
 
+  const [hasPw, setHasPw] = useState(false);
+  const [curPw, setCurPw] = useState('');
+  const [pw1, setPw1] = useState('');
+  const [pw2, setPw2] = useState('');
+
   async function refresh() {
     try {
       setDirName(await saveDirName());
       setGranted(!!(await getSaveDir()));
       setAutoSave(await getSetting('autoSave', false));
+      setHasPw(await hasAdminPassword());
     } catch (err) {
       console.error('설정 읽기 실패:', err);
       setStatus({ kind: 'err', text: `설정 읽기 오류: ${err.name || ''} ${err.message || err}` });
@@ -115,6 +122,27 @@ export default function Settings() {
     }
     downloadBackup();
   }
+  async function savePassword() {
+    if (pw1.length < 4) return toast('비밀번호는 4자 이상으로 설정하세요');
+    if (pw1 !== pw2) return toast('새 비밀번호와 확인이 일치하지 않습니다');
+    if (hasPw && !(await verifyAdminPassword(curPw))) return toast('현재 비밀번호가 올바르지 않습니다');
+    await setAdminPassword(pw1);
+    setCurPw(''); setPw1(''); setPw2('');
+    await refresh();
+    toast(hasPw ? '관리자 비밀번호를 변경했습니다' : '관리자 비밀번호를 설정했습니다');
+  }
+  async function removePassword() {
+    const cur = window.prompt('비밀번호를 해제하려면 현재 관리자 비밀번호를 입력하세요:');
+    if (cur == null) return;
+    if (await clearAdminPassword(cur)) {
+      setCurPw(''); setPw1(''); setPw2('');
+      await refresh();
+      toast('관리자 비밀번호를 해제했습니다');
+    } else {
+      toast('현재 비밀번호가 올바르지 않습니다');
+    }
+  }
+
   async function onImport(e) {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -193,6 +221,41 @@ export default function Settings() {
           <button className="btn primary sm" onClick={backupNow}>지금 전체 백업</button>
           <button className="btn sm" onClick={() => fileRef.current.click()}>백업 파일 불러오기</button>
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={onImport} />
+        </div>
+      </div>
+
+      <div className="panel">
+        <h2>관리자 비밀번호</h2>
+        <p className="hint">
+          <b>도면 삭제</b> 전에 비밀번호를 확인합니다. 설정하지 않으면 누구나 삭제할 수 있습니다.
+          비밀번호는 <b>이 브라우저에만</b> 저장되고 백업 파일에는 포함되지 않습니다.
+          잊었을 때는 <b>전체 백업 → 브라우저 데이터 삭제 → 백업 불러오기</b> 순서로 초기화하세요.
+        </p>
+        <div className="field" style={{ marginBottom: 10 }}>
+          <span>상태</span>
+          <div style={{ fontWeight: 700 }}>
+            {hasPw ? <span className="pill-ok">설정됨</span> : <span className="pill-ng">미설정</span>}
+          </div>
+        </div>
+        {hasPw && (
+          <label className="field" style={{ marginBottom: 8, maxWidth: 320 }}>
+            <span>현재 비밀번호</span>
+            <input type="password" value={curPw} onChange={(e) => setCurPw(e.target.value)} autoComplete="current-password" />
+          </label>
+        )}
+        <div className="grid cols-2" style={{ maxWidth: 480 }}>
+          <label className="field">
+            <span>{hasPw ? '새 비밀번호' : '비밀번호'} (4자 이상)</span>
+            <input type="password" value={pw1} onChange={(e) => setPw1(e.target.value)} autoComplete="new-password" />
+          </label>
+          <label className="field">
+            <span>비밀번호 확인</span>
+            <input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} autoComplete="new-password" />
+          </label>
+        </div>
+        <div className="btn-row" style={{ marginTop: 10 }}>
+          <button className="btn primary sm" onClick={savePassword}>{hasPw ? '비밀번호 변경' : '비밀번호 설정'}</button>
+          {hasPw && <button className="btn sm danger" onClick={removePassword}>비밀번호 해제</button>}
         </div>
       </div>
 
