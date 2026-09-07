@@ -66,7 +66,7 @@ export default function HistoryTab({ itemId }) {
       <p className="hint">셀 색: <span className="cell-ok">초록 OK</span> · <span className="cell-ng">빨강 NG</span>. 값은 측정값입니다.</p>
 
       <div className="table-wrap">
-        <table>
+        <table className="hist-table">
           <thead>
             <tr>
               <th style={{ position: 'sticky', left: 0, zIndex: 2 }}>No</th>

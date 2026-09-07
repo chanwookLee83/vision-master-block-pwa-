@@ -2,10 +2,17 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.1.9';
+export const APP_VERSION = '1.2.0';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.2.0',
+    date: '2026-09-07',
+    items: [
+      '측정 이력표 헤더·데이터를 가운데 정렬로 통일',
+    ],
+  },
   {
     version: '1.1.9',
     date: '2026-09-07',
