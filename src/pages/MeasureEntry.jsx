@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, setReading, getSetting } from '../lib/db.js';
 import { judge, deviationOf, limitsOf, tolText, fmt, isoWeekKey, nowTimeStr } from '../lib/tol.js';
 import { Crumbs, useToast, DecimalInput } from '../components/ui.jsx';
-import { safeName, getSaveDir, writeToDir, dataUrlToBlob, download, fsSupported } from '../lib/fs.js';
+import { safeName, getSaveDir, writeToDir, dataUrlToBlob, download, fsSupported, revealSaveDir } from '../lib/fs.js';
 import { makeZip } from '../lib/zip.js';
 import { sessionCsv, sessionReportHtml, openPrint } from '../lib/report.js';
 import { exportAll } from '../lib/backup.js';
@@ -162,6 +162,12 @@ export default function MeasureEntry() {
     if (!ok) toast('팝업이 차단되어 인쇄창을 열 수 없습니다');
   }
 
+  async function openFolder() {
+    const r = await revealSaveDir();
+    if (r === 'unsupported') toast('이 브라우저는 폴더 열기를 지원하지 않습니다. 다운로드 폴더를 확인하세요.');
+    else if (r === 'error') toast('폴더를 열 수 없습니다');
+  }
+
   async function finish() {
     const auto = await getSetting('autoSave', false);
     const dir = auto ? await getSaveDir({ prompt: true }) : null;
@@ -245,6 +251,7 @@ export default function MeasureEntry() {
           <div className="stat"><div className="k">전체</div><div className="v">{markers.length}</div></div>
           <span className="spacer" style={{ flex: 1 }} />
           <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
+          {fsSupported() && <button className="btn sm" onClick={openFolder}>저장 폴더 열기</button>}
           <button className="btn sm" onClick={printReport}>인쇄 / PDF</button>
         </div>
         {ngN > 0 && <p className="pill-ng" style={{ display: 'inline-block' }}>공차 이탈 {ngN}건 — 확인 필요</p>}
@@ -325,6 +332,7 @@ export default function MeasureEntry() {
       <div className="btn-row">
         <button className="btn primary" onClick={finish}>완료</button>
         <button className="btn" onClick={exportCsv}>CSV 저장</button>
+        {fsSupported() && <button className="btn" onClick={openFolder}>저장 폴더 열기</button>}
         <button className="btn" onClick={printReport}>인쇄 / PDF</button>
         <span className="muted">입력 즉시 자동 저장됩니다.</span>
       </div>

@@ -154,6 +154,21 @@ export async function saveDirName() {
   return handle ? handle.name : null;
 }
 
+// 저장 폴더를 파일 대화상자로 연다. 브라우저는 OS 탐색기를 직접 열 수 없어
+// 폴더 대화상자를 마지막 저장 위치(id: 'vmb-save')에서 띄우는 방식
+// — 파일 목록과 경로(주소줄)를 확인할 수 있다. 사용자 제스처 안에서 바로 호출할 것.
+// 반환: 'opened' | 'unsupported' | 'error'
+export async function revealSaveDir() {
+  if (!fsSupported()) return 'unsupported';
+  try {
+    await window.showDirectoryPicker({ id: 'vmb-save', mode: 'read' });
+    return 'opened';
+  } catch (e) {
+    if (e && e.name === 'AbortError') return 'opened';
+    return 'error';
+  }
+}
+
 // 폴더에 파일 쓰기 (같은 이름이면 덮어씀).
 export async function writeToDir(handle, filename, contents) {
   const fileHandle = await handle.getFileHandle(filename, { create: true });
