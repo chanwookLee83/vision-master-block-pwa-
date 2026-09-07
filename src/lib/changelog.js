@@ -2,10 +2,17 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.6.2';
+export const APP_VERSION = '1.6.3';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.6.3',
+    date: '2026-09-07',
+    items: [
+      '품목 삭제도 도면 삭제와 동일하게 관리자 비밀번호 확인',
+    ],
+  },
   {
     version: '1.6.2',
     date: '2026-09-07',

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { db, createItem, updateItem, deleteItem } from '../lib/db.js';
+import { requireAdmin } from '../lib/admin.js';
 import { Crumbs, useToast } from '../components/ui.jsx';
 
 const EMPTY = { partNo: '', partName: '', machineNo: '', note: '' };
@@ -40,6 +41,7 @@ export default function ItemForm() {
   }
 
   async function remove() {
+    if (!(await requireAdmin('품목 삭제'))) return;
     if (!confirm('이 품목과 모든 도면·치수·측정 이력을 삭제합니다. 계속할까요?')) return;
     await deleteItem(Number(id));
     toast('삭제했습니다');
