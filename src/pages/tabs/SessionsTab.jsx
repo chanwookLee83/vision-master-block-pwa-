@@ -51,7 +51,7 @@ export default function SessionsTab({ itemId }) {
         <Empty title="측정 기록이 없습니다">주차별로 측정값을 입력하면 공차 대비 OK/NG가 자동 계산됩니다.</Empty>
       ) : (
         <div className="table-wrap" style={{ marginTop: 12 }}>
-          <table>
+          <table className="sess-table">
             <thead>
               <tr>
                 <th>주차</th><th>측정일</th><th>시각</th><th>측정자</th>
