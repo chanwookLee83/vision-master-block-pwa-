@@ -291,7 +291,7 @@ function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker }
                   style={m.id === focusMarker ? { outline: '2px solid var(--focus)', outlineOffset: '-2px' } : undefined}
                 >
                   <td><span className="marker-no">{m.no}</span></td>
-                  <td className="muted" title={m.name || ''} style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name || '-'}</td>
+                  <td className="muted" title={m.name || ''} style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name || '-'}</td>
                   <td className="num nowrap">{fmt(m.nominal)} <span className="muted">{unit}</span></td>
                   <td className="num nowrap">{tolText(m)}</td>
                   <td className="num nowrap">
@@ -302,7 +302,7 @@ function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker }
                   <td className="num mv-cell">
                     <DecimalInput
                       id={`mv-${m.id}`}
-                      className={`right ${mvClass}`} style={{ width: 116 }}
+                      className={`right ${mvClass}`} style={{ width: 84 }}
                       value={v}
                       onChange={(n) => onInput(m.id, n)}
                       placeholder={m.nominal != null ? `${fmt(m.nominal)} 입력` : '측정값'}

@@ -223,12 +223,15 @@ tr.row-ng td { background: #fef7f6; }
 .annotator { display: grid; grid-template-columns: 1fr 360px; gap: 16px; }
 @media (max-width: 980px) { .annotator { grid-template-columns: 1fr; } }
 
-/* ---- 주간 측정 레이아웃: 기본 세로 배치(도면 위 / 표 아래, 표는 전체 폭) ---- */
+/* ---- 주간 측정 레이아웃: 기본 세로 배치(도면 위 / 표 아래) ---- */
 .measure-layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 1280px) {
-  .measure-layout { grid-template-columns: 440px minmax(0, 1fr); align-items: start; }
+@media (min-width: 1100px) {
+  /* 도면 : 표 = 5 : 5 — 측정하면서 도면 치수를 같이 확인 */
+  .measure-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  /* 도면은 스크롤해도 계속 보이도록 고정 */
+  .measure-layout > .measure-drawing { position: sticky; top: 64px; }
 }
-.measure-drawing .canvas-box { max-width: 760px; margin: 0 auto; }
+.measure-drawing .canvas-box { max-width: 100%; margin: 0 auto; }
 .measure-layout > .measure-drawing { min-width: 0; }
 
 .measure-cap {
@@ -251,6 +254,12 @@ tr.row-ng td { background: #fef7f6; }
 .measure-table th.mv-head { background: var(--beige-tint); color: var(--text); }
 .measure-table td.mv-cell { background: var(--beige-bg); }
 tr.row-ng td.mv-cell { background: #fde7e6; }
+
+/* 절반 폭에 들어가도록 촘촘하게 */
+.measure-table { font-size: 13px; }
+.measure-table th, .measure-table td { padding: 6px 6px; }
+.measure-table .mv { font-size: 13px; padding: 5px 6px; }
+.measure-table .marker-no { min-width: 20px; height: 20px; font-size: 11px; }
 .marker-no {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px;

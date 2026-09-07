@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.1.7';
+export const APP_VERSION = '1.1.8';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.1.8',
+    date: '2026-09-07',
+    items: [
+      '측정 화면을 도면 : 표 = 5:5 로 변경, 표 글자·입력칸을 촘촘하게',
+      '스크롤해도 도면이 계속 보이도록 왼쪽에 고정 (측정하며 도면 치수 확인)',
+    ],
+  },
   {
     version: '1.1.7',
     date: '2026-09-07',
