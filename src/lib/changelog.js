@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.3.3';
+export const APP_VERSION = '1.3.4';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.3.4',
+    date: '2026-09-07',
+    items: [
+      '도면 업로드 시 검은 치수선·치수문자가 보라/초록빛으로 번지던 문제 수정 (무손실 PNG 저장)',
+      '※ 이미 올린 도면은 다시 업로드해야 적용됩니다',
+    ],
+  },
   {
     version: '1.3.3',
     date: '2026-09-07',

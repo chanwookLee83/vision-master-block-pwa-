@@ -177,9 +177,17 @@ export function readImageFile(file, maxDim = 2000) {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        const type = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-        resolve({ dataUrl: canvas.toDataURL(type, 0.9), w: width, h: height });
+        const ctx = canvas.getContext('2d');
+        // 투명 PNG 도 흰 바탕으로 (도면 배경/‌OCR 일관성)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        // 도면의 얇은 검은 치수선·치수문자가 JPEG 색번짐으로 보라/초록빛이
+        // 되지 않도록 무손실 PNG 로 저장한다. 사진처럼 PNG 가 너무 커질 때만
+        // 고품질 JPEG 로 대체한다.
+        let dataUrl = canvas.toDataURL('image/png');
+        if (dataUrl.length > 4500000) dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        resolve({ dataUrl, w: width, h: height });
       };
       img.src = reader.result;
     };
