@@ -82,13 +82,13 @@ export function sessionReportHtml(item, session, markers, valueOf, drawings = []
 
   const body = `
     <h1>주간 치수 측정 성적서</h1>
+    ${drawingsHtml(drawings, markers, (m) => judge(m, valueOf(m.id)))}
     <table class="meta">
       <tr><th>품번</th><td>${esc(item.partNo || '-')}</td><th>호기</th><td>${esc(item.machineNo || '-')}</td></tr>
       <tr><th>품명</th><td>${esc(item.partName || '-')}</td><th>주차</th><td>${esc(session.weekKey || '-')}</td></tr>
       <tr><th>측정일</th><td>${esc(session.date || '-')} ${esc(session.time || '')}</td><th>측정자</th><td>${esc(session.inspector || '-')}</td></tr>
       ${session.note ? `<tr><th>비고</th><td colspan="3">${esc(session.note)}</td></tr>` : ''}
     </table>
-    ${drawingsHtml(drawings, markers, (m) => judge(m, valueOf(m.id)))}
     <div class="summary">
       <span>전체 <b>${markers.length}</b></span>
       <span class="ok">OK <b>${okN}</b></span>
@@ -189,10 +189,11 @@ function printDoc(title, body) {
   .summary .verdict.ng { background:#fdecea; color:#c0392b; }
   footer { margin-top:16px; font-size:11px; color:#666; }
   h2.dwg-h { font-size:13px; margin:4px 0 4px; }
-  .dwg { margin:0 0 8px; padding:0; }
+  .dwg { margin:0 0 6px; padding:0; }
   .dwg figcaption { font-weight:700; margin-bottom:3px; }
   .dwg-wrap { position:relative; display:inline-block; max-width:100%; border:1px solid #999; }
-  .dwg-wrap img { display:block; max-width:100%; height:auto; max-height:135mm; }
+  /* 한 페이지에 들어가도록 높이를 제한(안 그러면 이미지가 통째로 다음 장으로 밀려 앞장이 빈다) */
+  .dwg-wrap img { display:block; max-width:100%; height:auto; max-height:150mm; }
   .mk { position:absolute; transform:translate(-50%,-50%); box-sizing:border-box;
         min-width:16px; height:16px; padding:0 3px; border-radius:8px; border:1px solid #fff;
         background:#37718e; color:#fff; font-size:9px; font-weight:700; line-height:14px; text-align:center; }

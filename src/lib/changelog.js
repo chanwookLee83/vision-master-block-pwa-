@@ -2,10 +2,17 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.6.4';
+export const APP_VERSION = '1.6.5';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.6.5',
+    date: '2026-09-07',
+    items: [
+      '성적서 인쇄: 도면을 맨 위(제목 바로 아래)로 옮기고 한 페이지에 들어가도록 크기 제한 — 앞장 빈 공간 완전 제거',
+    ],
+  },
   {
     version: '1.6.4',
     date: '2026-09-07',
