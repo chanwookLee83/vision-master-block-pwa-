@@ -2,15 +2,22 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.6.0';
+export const APP_VERSION = '1.6.1';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
   {
+    version: '1.6.1',
+    date: '2026-09-07',
+    items: [
+      '인쇄/PDF 성적서에서 도면을 먼저, 치수 측정표를 그 다음에 나오도록 순서 변경',
+    ],
+  },
+  {
     version: '1.6.0',
     date: '2026-09-07',
     items: [
-      '주간 치수 측정 성적서(인쇄/PDF) 아래에 도면 이미지 + 번호 마커(OK·NG 색) 포함',
+      '주간 치수 측정 성적서(인쇄/PDF) 에 도면 이미지 + 번호 마커(OK·NG 색) 포함',
       'CSV 를 저장 폴더로 내보낼 때 도면 이미지 파일도 함께 저장',
     ],
   },

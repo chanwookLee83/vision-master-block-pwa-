@@ -88,6 +88,7 @@ export function sessionReportHtml(item, session, markers, valueOf, drawings = []
       <tr><th>측정일</th><td>${esc(session.date || '-')} ${esc(session.time || '')}</td><th>측정자</th><td>${esc(session.inspector || '-')}</td></tr>
       ${session.note ? `<tr><th>비고</th><td colspan="3">${esc(session.note)}</td></tr>` : ''}
     </table>
+    ${drawingsHtml(drawings, markers, (m) => judge(m, valueOf(m.id)))}
     <div class="summary">
       <span>전체 <b>${markers.length}</b></span>
       <span class="ok">OK <b>${okN}</b></span>
@@ -101,8 +102,7 @@ export function sessionReportHtml(item, session, markers, valueOf, drawings = []
         <th>합격범위</th><th>측정값</th><th>편차</th><th>판정</th>
       </tr></thead>
       <tbody>${rows}</tbody>
-    </table>
-    ${drawingsHtml(drawings, markers, (m) => judge(m, valueOf(m.id)))}`;
+    </table>`;
   return printDoc(`측정성적서_${item.partNo || ''}_${session.weekKey || session.date || ''}`, body);
 }
 
