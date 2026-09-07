@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, setReading, getSetting } from '../lib/db.js';
 import { judge, deviationOf, limitsOf, tolText, fmt, isoWeekKey, nowTimeStr } from '../lib/tol.js';
 import { Crumbs, useToast, DecimalInput } from '../components/ui.jsx';
-import { saveFile, safeName, getSaveDir, writeToDir } from '../lib/fs.js';
+import { saveFile, safeName, getSaveDir, writeToDir, dataUrlToBlob } from '../lib/fs.js';
 import { sessionCsv, sessionReportHtml, openPrint } from '../lib/report.js';
 import { exportAll } from '../lib/backup.js';
 import MarkerCanvas from '../components/MarkerCanvas.jsx';
@@ -106,13 +106,32 @@ export default function MeasureEntry() {
   const baseName = () =>
     `측정_${safeName(item.partNo || 'item')}_${safeName(session.weekKey || session.date || '')}`;
 
+  // 저장 폴더에 도면 이미지도 함께 저장. 반환: 저장한 장수
+  async function writeDrawingImages(dir) {
+    let n = 0;
+    for (const d of drawings) {
+      if (!d.dataUrl) continue;
+      const blob = dataUrlToBlob(d.dataUrl);
+      const ext = (blob.type || '').includes('png') ? 'png' : 'jpg';
+      const label = d.name ? `_${safeName(d.name)}` : '';
+      try { await writeToDir(dir, `${baseName()}_도면${n + 1}${label}.${ext}`, blob); n++; } catch { /* skip */ }
+    }
+    return n;
+  }
+
   async function exportCsv() {
     const res = await saveFile(`${baseName()}.csv`, sessionCsv(item, session, markers, valueOf), 'text/csv;charset=utf-8');
-    toast(res.target === 'folder' ? `${res.dir} 폴더에 저장했습니다` : 'CSV를 내려받았습니다');
+    if (res.target === 'folder') {
+      const dir = await getSaveDir();
+      const n = dir ? await writeDrawingImages(dir) : 0;
+      toast(`${res.dir} 폴더에 저장했습니다${n ? ` · 도면 ${n}장` : ''}`);
+    } else {
+      toast('CSV를 내려받았습니다 (도면 이미지는 인쇄/PDF 에 포함됩니다)');
+    }
   }
 
   function printReport() {
-    const ok = openPrint(sessionReportHtml(item, session, markers, valueOf));
+    const ok = openPrint(sessionReportHtml(item, session, markers, valueOf, drawings));
     if (!ok) toast('팝업이 차단되어 인쇄창을 열 수 없습니다');
   }
 
@@ -122,10 +141,11 @@ export default function MeasureEntry() {
     if (dir) {
       try {
         await writeToDir(dir, `${baseName()}.csv`, sessionCsv(item, session, markers, valueOf));
+        const n = await writeDrawingImages(dir);
         const dump = await exportAll();
         await writeToDir(dir, 'vmb-backup-최신.json',
           new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
-        toast(`${dir.name} 폴더에 CSV·백업을 저장했습니다`);
+        toast(`${dir.name} 폴더에 CSV·백업${n ? `·도면 ${n}장` : ''}을 저장했습니다`);
       } catch (e) {
         toast('폴더 저장 실패: ' + e.message);
       }

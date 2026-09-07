@@ -196,3 +196,13 @@ export async function saveFile(filename, contents, type = 'application/octet-str
 
 // 파일명에 못 쓰는 문자 정리
 export const safeName = (s) => (s || '').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'vmb';
+
+// dataURL → Blob
+export function dataUrlToBlob(dataUrl) {
+  const [head, b64] = String(dataUrl).split(',');
+  const mime = (head.match(/data:([^;]+)/) || [])[1] || 'application/octet-stream';
+  const bin = atob(b64 || '');
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}

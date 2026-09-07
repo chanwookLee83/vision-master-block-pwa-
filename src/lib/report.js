@@ -33,7 +33,30 @@ export function sessionCsv(item, session, markers, valueOf) {
   return csvBlob(lines);
 }
 
-export function sessionReportHtml(item, session, markers, valueOf) {
+// 성적서에 넣을 도면 이미지(+ 번호 마커) 블록
+function drawingsHtml(drawings, markers, statusOf) {
+  if (!drawings || !drawings.length) return '';
+  const blocks = drawings
+    .filter((d) => d && d.dataUrl)
+    .map((d) => {
+      const dots = markers
+        .filter((m) => m.drawingId === d.id)
+        .map((m) => {
+          const j = statusOf ? statusOf(m) : null;
+          const cls = j === 'NG' ? ' ng' : j === 'OK' ? ' ok' : '';
+          return `<span class="mk${cls}" style="left:${(m.xr ?? 0) * 100}%;top:${(m.yr ?? 0) * 100}%">${esc(m.no)}</span>`;
+        })
+        .join('');
+      return `<figure class="dwg">
+        <figcaption>${esc(d.name || '도면')}</figcaption>
+        <div class="dwg-wrap"><img src="${d.dataUrl}" alt="">${dots}</div>
+      </figure>`;
+    })
+    .join('');
+  return blocks ? `<h2 class="dwg-h">도면</h2><div class="dwgs">${blocks}</div>` : '';
+}
+
+export function sessionReportHtml(item, session, markers, valueOf, drawings = []) {
   const rows = markers.map((m) => {
     const lim = limitsOf(m);
     const v = valueOf(m.id);
@@ -78,7 +101,8 @@ export function sessionReportHtml(item, session, markers, valueOf) {
         <th>합격범위</th><th>측정값</th><th>편차</th><th>판정</th>
       </tr></thead>
       <tbody>${rows}</tbody>
-    </table>`;
+    </table>
+    ${drawingsHtml(drawings, markers, (m) => judge(m, valueOf(m.id)))}`;
   return printDoc(`측정성적서_${item.partNo || ''}_${session.weekKey || session.date || ''}`, body);
 }
 
@@ -164,6 +188,15 @@ function printDoc(title, body) {
   .summary .verdict.ok { background:#eaf6ec; color:#1e7e34; }
   .summary .verdict.ng { background:#fdecea; color:#c0392b; }
   footer { margin-top:16px; font-size:11px; color:#666; }
+  h2.dwg-h { font-size:14px; margin:18px 0 8px; }
+  .dwg { margin:0 0 12px; padding:0; page-break-inside:avoid; }
+  .dwg figcaption { font-weight:700; margin-bottom:4px; }
+  .dwg-wrap { position:relative; display:inline-block; max-width:100%; border:1px solid #999; }
+  .dwg-wrap img { display:block; max-width:100%; height:auto; }
+  .mk { position:absolute; transform:translate(-50%,-50%); box-sizing:border-box;
+        min-width:16px; height:16px; padding:0 3px; border-radius:8px; border:1px solid #fff;
+        background:#37718e; color:#fff; font-size:9px; font-weight:700; line-height:14px; text-align:center; }
+  .mk.ng { background:#c0392b; } .mk.ok { background:#1e7e34; }
   @media print { body { margin:12mm; } @page { size:A4 landscape; margin:12mm; } }
 </style></head><body>
 ${body}
