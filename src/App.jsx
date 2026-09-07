@@ -13,7 +13,7 @@ export default function App() {
     <ToastProvider>
       <div className="topbar">
         <Link to="/" className="brand">
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" />
+          <span className="brand-emoji" aria-hidden>📐</span>
           <span>측정관리 이력관리 시스템</span>
         </Link>
         <span className="spacer" />
