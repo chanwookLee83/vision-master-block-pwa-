@@ -18,6 +18,7 @@
   --beige-tint: #f2e7cf;      /* 측정 헤더 배경 */
   --beige-border: #d8c39a;    /* 측정 입력칸 테두리 */
   --beige-strong: #a9812f;    /* 측정 강조 텍스트 */
+  --focus: #1d4ed8;           /* "지금 입력할 번호" 표시 (파랑, NG 빨강과 구분) */
   --radius: 12px;
   --shadow: 0 1px 3px rgba(20, 24, 40, 0.08), 0 6px 20px rgba(20, 24, 40, 0.06);
 }
@@ -278,7 +279,13 @@ tr.row-ng td.mv-cell { background: #fde7e6; }
   font-size: 12px; font-weight: 800;
   cursor: grab;
 }
-.marker.sel { background: #db2777; transform: scale(1.15); z-index: 5; }
+.marker.sel {
+  background: var(--focus);
+  transform: scale(1.18);
+  z-index: 5;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.45), 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+/* 측정 판정 색은 배경만 덮고, 선택(파랑) 링은 유지 */
 .marker.ng { background: var(--ng); }
 .marker.ok { background: var(--ok); }
 .marker.small { width: 20px; height: 20px; margin: -10px 0 0 -10px; font-size: 10px; }

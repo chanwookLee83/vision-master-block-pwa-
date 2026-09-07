@@ -216,8 +216,9 @@ export default function MeasureEntry() {
                 small
               />
               <p className="hint">
-                도면의 번호 = 아래 표의 <b>No</b>. 마커 색: <span className="cell-ok">초록 OK</span> ·{' '}
-                <span className="cell-ng">빨강 NG</span> · 회색 미입력
+                도면의 번호 = 아래 표의 <b>No</b>. 마커 색:{' '}
+                <b style={{ color: 'var(--focus)' }}>파랑 = 지금 입력할 번호</b> ·{' '}
+                <span className="cell-ok">초록 OK</span> · <span className="cell-ng">빨강 NG</span> · 회색 미입력
               </p>
             </div>
             <MeasureTable
@@ -287,7 +288,7 @@ function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker }
                   key={m.id}
                   className={j === 'NG' ? 'row-ng' : ''}
                   onFocus={() => setFocusMarker(m.id)}
-                  style={m.id === focusMarker ? { outline: '2px solid var(--brand)', outlineOffset: '-2px' } : undefined}
+                  style={m.id === focusMarker ? { outline: '2px solid var(--focus)', outlineOffset: '-2px' } : undefined}
                 >
                   <td><span className="marker-no">{m.no}</span></td>
                   <td className="muted" title={m.name || ''} style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name || '-'}</td>
