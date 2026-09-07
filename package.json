@@ -1,7 +1,7 @@
 {
   "name": "vision-master-block-pwa",
   "private": true,
-  "version": "1.1.8",
+  "version": "1.1.9",
   "type": "module",
   "description": "Vision Master Block 주간 치수 측정 관리 PWA",
   "scripts": {

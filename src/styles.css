@@ -234,6 +234,9 @@ tr.row-ng td { background: #fef7f6; }
 .measure-drawing .canvas-box { max-width: 100%; margin: 0 auto; }
 .measure-layout > .measure-drawing { min-width: 0; }
 
+/* 측정 중인 마커가 화면 밖이면 그쪽으로 자동 스크롤되도록 캔버스에 내부 스크롤 */
+.canvas-box.scrollable { max-height: calc(100vh - 104px); overflow: auto; scroll-behavior: smooth; }
+
 .measure-cap {
   display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
   padding: 8px 12px; margin-bottom: 8px;

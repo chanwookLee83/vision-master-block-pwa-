@@ -214,6 +214,7 @@ export default function MeasureEntry() {
                 statusOf={statusOf}
                 onSelect={setFocusMarker}
                 small
+                scrollable
               />
               <p className="hint">
                 도면의 번호 = 아래 표의 <b>No</b>. 마커 색:{' '}

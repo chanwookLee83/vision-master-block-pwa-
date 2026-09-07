@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * 도면 이미지 위에 마커를 표시/편집.
@@ -11,19 +11,43 @@ import { useRef, useState } from 'react';
  *  - onSelect(id)
  *  - onMove(id, xr, yr) 드래그 이동 (편집 모드)
  *  - small: 마커 작게
+ *  - scrollable: 캔버스 높이를 제한하고 내부 스크롤 + 선택 마커로 자동 이동
  *  - roi: {xr,yr,wr,hr}  선택 마커의 치수 인식 영역 (표시용)
  *  - roiMode: true 면 캔버스 드래그로 새 영역을 그림 (마커 이동/추가 비활성)
  *  - onRoi({xr,yr,wr,hr})  영역 지정 완료 콜백
  */
 export default function MarkerCanvas({
   src, markers = [], selectedId, statusOf,
-  onAdd, onSelect, onMove, small,
+  onAdd, onSelect, onMove, small, scrollable,
   roi, roiMode, onRoi,
 }) {
   const boxRef = useRef(null);
   const dragId = useRef(null);
   const roiStart = useRef(null);
   const [draftRoi, setDraftRoi] = useState(null);
+
+  // 선택된(= 지금 측정 중인) 마커가 캔버스에서 벗어나 있으면 그쪽으로 부드럽게 스크롤
+  const scrollToSelected = () => {
+    const box = boxRef.current;
+    if (!box || selectedId == null) return;
+    const el = box.querySelector(`.marker[data-id="${selectedId}"]`);
+    if (!el) return;
+    const overflowY = box.scrollHeight > box.clientHeight + 1;
+    const overflowX = box.scrollWidth > box.clientWidth + 1;
+    if (!overflowY && !overflowX) return;
+    const m = 48; // 가장자리 여유
+    const offV = overflowY && (el.offsetTop < box.scrollTop + m
+      || el.offsetTop + el.offsetHeight > box.scrollTop + box.clientHeight - m);
+    const offX = overflowX && (el.offsetLeft < box.scrollLeft + m
+      || el.offsetLeft + el.offsetWidth > box.scrollLeft + box.clientWidth - m);
+    if (!offV && !offX) return; // 이미 잘 보이면 그대로
+    box.scrollTo({
+      top: offV ? Math.max(0, el.offsetTop - box.clientHeight / 2) : box.scrollTop,
+      left: offX ? Math.max(0, el.offsetLeft - box.clientWidth / 2) : box.scrollLeft,
+      behavior: 'smooth',
+    });
+  };
+  useEffect(scrollToSelected, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const rel = (e) => {
     const r = boxRef.current.getBoundingClientRect();
@@ -95,13 +119,13 @@ export default function MarkerCanvas({
 
   return (
     <div
-      className={`canvas-box${roiMode ? ' roi-mode' : ''}`}
+      className={`canvas-box${roiMode ? ' roi-mode' : ''}${scrollable ? ' scrollable' : ''}`}
       ref={boxRef}
       onClick={onCanvasClick}
       onMouseDown={startRoi}
       onTouchStart={startRoi}
     >
-      <img src={src} alt="도면" />
+      <img src={src} alt="도면" onLoad={scrollToSelected} />
 
       {shownRoi && shownRoi.wr > 0 && shownRoi.hr > 0 && (
         <div
@@ -120,6 +144,7 @@ export default function MarkerCanvas({
         return (
           <div
             key={m.id}
+            data-id={m.id}
             className={[
               'marker',
               small ? 'small' : '',
