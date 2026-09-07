@@ -167,7 +167,7 @@ function printDoc(title, body) {
   @media print { body { margin:12mm; } @page { size:A4 landscape; margin:12mm; } }
 </style></head><body>
 ${body}
-<footer>생성: ${new Date().toLocaleString('ko-KR')} · Vision Master Block 측정관리</footer>
+<footer>생성: ${new Date().toLocaleString('ko-KR')} · 측정관리 이력관리 시스템</footer>
 </body></html>`;
 }
 
