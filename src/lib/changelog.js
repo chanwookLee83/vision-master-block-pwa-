@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.1.2';
+export const APP_VERSION = '1.1.3';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.1.3',
+    date: '2026-09-07',
+    items: [
+      '치수표를 기본 읽기 전용으로 변경 (실수로 값이 바뀌는 것 방지) — "편집" 버튼으로 잠금 해제',
+      '치수표 삭제 버튼이 잘리지 않도록 화면 폭 확대',
+    ],
+  },
   {
     version: '1.1.2',
     date: '2026-09-07',
