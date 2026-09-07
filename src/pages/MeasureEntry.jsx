@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, setReading, getSetting } from '../lib/db.js';
@@ -31,6 +31,30 @@ export default function MeasureEntry() {
   useEffect(() => {
     if (session && !session.time) db.sessions.update(sid, { time: nowTimeStr() });
   }, [session, sid]);
+
+  // 측정 도중 나갔다가 다시 열면, 아직 입력 안 한 첫 번호로 포커스를 옮겨준다.
+  const didResume = useRef(false);
+  useEffect(() => {
+    if (didResume.current || !markers || !readings) return;
+    didResume.current = true;
+    const hasValue = (mid) => {
+      const r = readings.find((x) => x.markerId === mid);
+      return r && r.value !== '' && r.value != null;
+    };
+    const measured = markers.filter((m) => hasValue(m.id)).length;
+    if (measured === 0) return; // 새 측정: 방해하지 않음
+    const next = markers.find((m) => !hasValue(m.id));
+    if (!next) return; // 이미 전부 입력됨
+    setFocusMarker(next.id);
+    setTimeout(() => {
+      const el = document.getElementById(`mv-${next.id}`);
+      if (el) {
+        el.focus();
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }, 120);
+    toast(`${next.no}번부터 이어서 측정하세요 (${measured}/${markers.length} 완료)`);
+  }, [markers, readings]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!item || !session || !markers || !drawings || !readings) return null;
 
@@ -152,6 +176,24 @@ export default function MeasureEntry() {
           <button className="btn sm" onClick={printReport}>인쇄 / PDF</button>
         </div>
         {ngN > 0 && <p className="pill-ng" style={{ display: 'inline-block' }}>공차 이탈 {ngN}건 — 확인 필요</p>}
+        {(() => {
+          const isEmpty = (m) => { const val = valueOf(m.id); return val === '' || val == null; };
+          const measured = markers.filter((m) => !isEmpty(m)).length;
+          if (markers.length === 0) return null;
+          if (measured === markers.length) {
+            return <p className="hint" style={{ marginTop: 8 }}>측정 완료 · {measured}/{markers.length}개 입력됨</p>;
+          }
+          if (measured > 0) {
+            const next = markers.find(isEmpty);
+            return (
+              <p className="hint" style={{ marginTop: 8 }}>
+                측정 진행 <b>{measured}/{markers.length}</b>
+                {next ? <> · <b>{next.no}번</b>부터 이어서 입력하세요</> : null}
+              </p>
+            );
+          }
+          return null;
+        })()}
       </div>
 
       {markers.length === 0 && (
@@ -258,6 +300,7 @@ function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker }
                   </td>
                   <td className="num mv-cell">
                     <DecimalInput
+                      id={`mv-${m.id}`}
                       className={`right ${mvClass}`} style={{ width: 116 }}
                       value={v}
                       onChange={(n) => onInput(m.id, n)}

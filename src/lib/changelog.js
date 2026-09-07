@@ -2,10 +2,19 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.1.5';
+export const APP_VERSION = '1.1.6';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.1.6',
+    date: '2026-09-07',
+    items: [
+      '주간 측정 목록에 “진행”(입력 N/전체) 표시 — 측정중 / 완료 / 시작 전 구분',
+      '측정 중이던 기록을 다시 열면 아직 입력 안 한 첫 번호로 자동 포커스 + 스크롤',
+      '측정 화면 상단에 “측정 진행 N/전체 · O번부터 이어서” 안내 추가',
+    ],
+  },
   {
     version: '1.1.5',
     date: '2026-09-07',

@@ -21,13 +21,16 @@ export default function SessionsTab({ itemId }) {
 
   function summarize(sessionId) {
     const rows = readings.filter((r) => r.sessionId === sessionId);
-    let ok = 0, ng = 0, blank = markers.length;
+    const total = markers.length;
+    let ok = 0, ng = 0, done = 0;
     for (const r of rows) {
+      if (r.value === '' || r.value == null) continue;
+      done++;
       const v = judge(markerById[r.markerId], r.value);
-      if (v === 'OK') { ok++; blank--; }
-      else if (v === 'NG') { ng++; blank--; }
+      if (v === 'OK') ok++;
+      else if (v === 'NG') ng++;
     }
-    return { ok, ng, blank: Math.max(0, blank) };
+    return { ok, ng, done, total, blank: Math.max(0, total - done) };
   }
 
   async function newSession() {
@@ -53,12 +56,14 @@ export default function SessionsTab({ itemId }) {
               <tr>
                 <th>주차</th><th>측정일</th><th>시각</th><th>측정자</th>
                 <th className="num">OK</th><th className="num">NG</th><th className="num">미입력</th>
-                <th>판정</th><th></th>
+                <th>진행</th><th>판정</th><th></th>
               </tr>
             </thead>
             <tbody>
               {sessions.map((s) => {
                 const sm = summarize(s.id);
+                const complete = sm.total > 0 && sm.done >= sm.total;
+                const inProgress = sm.done > 0 && !complete;
                 return (
                   <tr key={s.id} className={sm.ng ? 'row-ng' : ''}>
                     <td><b>{s.weekKey || '-'}</b></td>
@@ -68,9 +73,17 @@ export default function SessionsTab({ itemId }) {
                     <td className="num cell-ok">{sm.ok}</td>
                     <td className="num cell-ng">{sm.ng || ''}</td>
                     <td className="num muted">{sm.blank || ''}</td>
+                    <td className="nowrap">
+                      <b>{sm.done}/{sm.total}</b>{' '}
+                      {complete && <span className="pill-ok">완료</span>}
+                      {inProgress && <span className="pill-wip">측정중</span>}
+                      {sm.done === 0 && <span className="muted">시작 전</span>}
+                    </td>
                     <td>{sm.ng ? <span className="pill-ng">NG</span> : sm.ok ? <span className="pill-ok">OK</span> : <span className="muted">-</span>}</td>
                     <td className="nowrap">
-                      <button className="btn sm" onClick={() => nav(`/items/${itemId}/measure/${s.id}`)}>열기</button>{' '}
+                      <button className="btn sm" onClick={() => nav(`/items/${itemId}/measure/${s.id}`)}>
+                        {inProgress ? '이어서 측정' : '열기'}
+                      </button>{' '}
                       <button
                         className="btn sm danger"
                         onClick={async () => {
