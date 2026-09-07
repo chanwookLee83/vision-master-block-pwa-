@@ -114,6 +114,29 @@ export function CollapsePanel({ title, subtitle, defaultOpen = false, actions, c
   );
 }
 
+/**
+ * 가운데 뜨는 모달. 배경 클릭 / Esc 로 닫힘.
+ * props: title, onClose, children
+ */
+export function Modal({ title, onClose, children }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <b>{title}</b>
+          <button className="btn sm ghost" onClick={onClose} aria-label="닫기">✕</button>
+        </div>
+        <div className="modal-body">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 const ToastCtx = createContext(() => {});
 export const useToast = () => useContext(ToastCtx);
 

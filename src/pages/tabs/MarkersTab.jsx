@@ -121,7 +121,6 @@ export default function MarkersTab({ itemId }) {
                     {lim ? (
                       <span style={{ fontWeight: 700 }}>
                         {fmt(lim.lo)} ~ {fmt(lim.hi)}
-                        <span className="muted" style={{ fontWeight: 400 }}> {m.unit || 'mm'}</span>
                       </span>
                     ) : (
                       <span className="muted">기준치수 입력 필요</span>

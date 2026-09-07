@@ -2,15 +2,23 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.7.0';
+export const APP_VERSION = '1.7.1';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
   {
+    version: '1.7.1',
+    date: '2026-09-07',
+    items: [
+      '"저장 폴더 보기" — 저장 폴더 안의 파일 목록을 앱에서 바로 보고 다시 받을 수 있게',
+      '치수표 합격범위에서 단위(mm) 표기 제거 (옆 단위 칸과 중복)',
+    ],
+  },
+  {
     version: '1.7.0',
     date: '2026-09-07',
     items: [
-      '측정 화면 "CSV 저장" 옆에 "저장 폴더 열기" 버튼 추가 (저장 위치·파일 목록 확인)',
+      '측정 화면 "CSV 저장" 옆에 "저장 폴더 보기" 버튼 추가',
     ],
   },
   {

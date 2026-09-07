@@ -154,19 +154,28 @@ export async function saveDirName() {
   return handle ? handle.name : null;
 }
 
-// 저장 폴더를 파일 대화상자로 연다. 브라우저는 OS 탐색기를 직접 열 수 없어
-// 폴더 대화상자를 마지막 저장 위치(id: 'vmb-save')에서 띄우는 방식
-// — 파일 목록과 경로(주소줄)를 확인할 수 있다. 사용자 제스처 안에서 바로 호출할 것.
-// 반환: 'opened' | 'unsupported' | 'error'
-export async function revealSaveDir() {
-  if (!fsSupported()) return 'unsupported';
-  try {
-    await window.showDirectoryPicker({ id: 'vmb-save', mode: 'read' });
-    return 'opened';
-  } catch (e) {
-    if (e && e.name === 'AbortError') return 'opened';
-    return 'error';
+// 저장 폴더 안의 파일 목록 (최근 수정 순). 브라우저는 OS 탐색기를 직접 열 수
+// 없어서 앱 안에서 목록을 보여준다. 폴더 미지정/권한 없음이면 null.
+export async function listSaveDirFiles() {
+  const dir = await getSaveDir({ prompt: true });
+  if (!dir) return null;
+  const out = [];
+  for await (const entry of dir.values()) {
+    if (entry.kind !== 'file') continue;
+    let size = 0, lastModified = 0;
+    try { const f = await entry.getFile(); size = f.size; lastModified = f.lastModified; } catch { /* ignore */ }
+    out.push({ name: entry.name, size, lastModified });
   }
+  out.sort((a, b) => b.lastModified - a.lastModified);
+  return out;
+}
+
+// 저장 폴더의 파일 하나를 File 로 읽는다 (다시 내려받기용).
+export async function readSaveDirFile(name) {
+  const dir = await getSaveDir();
+  if (!dir) return null;
+  const fh = await dir.getFileHandle(name);
+  return fh.getFile();
 }
 
 // 폴더에 파일 쓰기 (같은 이름이면 덮어씀).

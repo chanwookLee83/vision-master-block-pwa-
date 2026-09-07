@@ -3,8 +3,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, setReading, getSetting } from '../lib/db.js';
 import { judge, deviationOf, limitsOf, tolText, fmt, isoWeekKey, nowTimeStr } from '../lib/tol.js';
-import { Crumbs, useToast, DecimalInput } from '../components/ui.jsx';
-import { safeName, getSaveDir, writeToDir, dataUrlToBlob, download, fsSupported, revealSaveDir } from '../lib/fs.js';
+import { Crumbs, useToast, DecimalInput, Modal } from '../components/ui.jsx';
+import { safeName, getSaveDir, writeToDir, dataUrlToBlob, download, fsSupported, listSaveDirFiles, readSaveDirFile, saveDirName } from '../lib/fs.js';
 import { makeZip } from '../lib/zip.js';
 import { sessionCsv, sessionReportHtml, openPrint } from '../lib/report.js';
 import { exportAll } from '../lib/backup.js';
@@ -21,6 +21,7 @@ export default function MeasureEntry() {
   // 빠르게 타이핑할 때 글자가 잘리는 것을 막는다. (한번 건드린 칸은 로컬이 우선)
   const [edits, setEdits] = useState({});
   const [sEdits, setSEdits] = useState({}); // 측정 정보(측정자·주차·비고 등) 낙관적 보관
+  const [folderView, setFolderView] = useState(null); // null | {loading} | {files, dir}
 
   const item = useLiveQuery(() => db.items.get(itemId), [itemId]);
   const session = useLiveQuery(() => db.sessions.get(sid), [sid]);
@@ -163,9 +164,32 @@ export default function MeasureEntry() {
   }
 
   async function openFolder() {
-    const r = await revealSaveDir();
-    if (r === 'unsupported') toast('이 브라우저는 폴더 열기를 지원하지 않습니다. 다운로드 폴더를 확인하세요.');
-    else if (r === 'error') toast('폴더를 열 수 없습니다');
+    if (!fsSupported()) {
+      toast('이 브라우저는 폴더 보기를 지원하지 않습니다. 저장한 파일은 브라우저 “다운로드” 폴더에 있습니다.');
+      return;
+    }
+    setFolderView({ loading: true });
+    try {
+      const files = await listSaveDirFiles();
+      if (files == null) {
+        setFolderView(null);
+        toast('저장 폴더가 지정되지 않았습니다. 파일은 “다운로드” 폴더에 있고, 설정에서 폴더를 지정하면 여기서 목록을 볼 수 있습니다.');
+        return;
+      }
+      setFolderView({ files, dir: await saveDirName() });
+    } catch (e) {
+      setFolderView(null);
+      toast('폴더를 읽지 못했습니다: ' + (e.message || e));
+    }
+  }
+  async function downloadSaved(name) {
+    try {
+      const f = await readSaveDirFile(name);
+      if (f) download(name, f);
+      else toast('파일을 찾지 못했습니다');
+    } catch {
+      toast('파일을 열지 못했습니다');
+    }
   }
 
   async function finish() {
@@ -251,7 +275,7 @@ export default function MeasureEntry() {
           <div className="stat"><div className="k">전체</div><div className="v">{markers.length}</div></div>
           <span className="spacer" style={{ flex: 1 }} />
           <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
-          {fsSupported() && <button className="btn sm" onClick={openFolder}>저장 폴더 열기</button>}
+          {fsSupported() && <button className="btn sm" onClick={openFolder}>저장 폴더 보기</button>}
           <button className="btn sm" onClick={printReport}>인쇄 / PDF</button>
         </div>
         {ngN > 0 && <p className="pill-ng" style={{ display: 'inline-block' }}>공차 이탈 {ngN}건 — 확인 필요</p>}
@@ -332,10 +356,43 @@ export default function MeasureEntry() {
       <div className="btn-row">
         <button className="btn primary" onClick={finish}>완료</button>
         <button className="btn" onClick={exportCsv}>CSV 저장</button>
-        {fsSupported() && <button className="btn" onClick={openFolder}>저장 폴더 열기</button>}
+        {fsSupported() && <button className="btn" onClick={openFolder}>저장 폴더 보기</button>}
         <button className="btn" onClick={printReport}>인쇄 / PDF</button>
         <span className="muted">입력 즉시 자동 저장됩니다.</span>
       </div>
+
+      {folderView && (
+        <Modal
+          title={`저장 폴더${folderView.dir ? ` · 📁 ${folderView.dir}` : ''}`}
+          onClose={() => setFolderView(null)}
+        >
+          {folderView.loading && <p className="muted">읽는 중…</p>}
+          {folderView.files && folderView.files.length === 0 && (
+            <p className="muted">폴더에 파일이 없습니다.</p>
+          )}
+          {folderView.files && folderView.files.length > 0 && (
+            <div className="table-wrap">
+              <table className="sess-table">
+                <thead><tr><th>파일</th><th>크기</th><th>수정</th><th></th></tr></thead>
+                <tbody>
+                  {folderView.files.map((f) => (
+                    <tr key={f.name}>
+                      <td style={{ textAlign: 'left', wordBreak: 'break-all' }}>{f.name}</td>
+                      <td className="nowrap">{f.size ? `${Math.max(1, Math.round(f.size / 1024))} KB` : '-'}</td>
+                      <td className="nowrap">{f.lastModified ? new Date(f.lastModified).toLocaleString('ko-KR') : '-'}</td>
+                      <td><button className="btn sm" onClick={() => downloadSaved(f.name)}>받기</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p className="hint" style={{ marginTop: 10 }}>
+            브라우저는 탐색기를 직접 열 수 없어 파일 목록만 보여줍니다.
+            실제 폴더는 설정에서 지정한 위치입니다.
+          </p>
+        </Modal>
+      )}
     </>
   );
 }
