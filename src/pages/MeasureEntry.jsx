@@ -35,13 +35,24 @@ export default function MeasureEntry() {
   // 측정 도중 나갔다가 다시 열면, 아직 입력 안 한 첫 번호로 포커스를 옮겨준다.
   const didResume = useRef(false);
   useEffect(() => {
-    if (didResume.current || !markers || !readings) return;
+    if (didResume.current || !markers || !readings || !session) return;
     didResume.current = true;
     const hasValue = (mid) => {
       const r = readings.find((x) => x.markerId === mid);
       return r && r.value !== '' && r.value != null;
     };
     const measured = markers.filter((m) => hasValue(m.id)).length;
+
+    // 측정자 이름이 비어 있으면 이름 칸부터 채우도록 유도
+    if (!(session.inspector || '').trim()) {
+      setTimeout(() => {
+        const el = document.getElementById('sess-inspector');
+        if (el) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      }, 120);
+      toast('측정값 입력 전에 측정자 이름을 먼저 입력하세요');
+      return;
+    }
+
     if (measured === 0) return; // 새 측정: 방해하지 않음
     const next = markers.find((m) => !hasValue(m.id));
     if (!next) return; // 이미 전부 입력됨
@@ -54,7 +65,7 @@ export default function MeasureEntry() {
       }
     }, 120);
     toast(`${next.no}번부터 이어서 측정하세요 (${measured}/${markers.length} 완료)`);
-  }, [markers, readings]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [markers, readings, session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!item || !session || !markers || !drawings || !readings) return null;
 
@@ -64,9 +75,21 @@ export default function MeasureEntry() {
     db.sessions.update(sid, patch);
   };
 
+  // 측정자 이름을 먼저 받는다 (누락 방지)
+  const nameMissing = !String(sval('inspector')).trim();
+  const requireName = (e) => {
+    if (!nameMissing) return true;
+    if (e && e.target && e.target.blur) e.target.blur();
+    window.alert('먼저 측정자의 이름을 입력하세요.');
+    const el = document.getElementById('sess-inspector');
+    if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.focus(); }
+    return false;
+  };
+
   const valueOf = (markerId) =>
     edits[markerId] ?? (readings.find((r) => r.markerId === markerId)?.value ?? '');
   const onInput = (mid, n) => {
+    if (nameMissing) return; // 이름 입력 전에는 측정값 저장 안 함
     setEdits((e) => ({ ...e, [mid]: n == null ? '' : n }));
     setReading(sid, mid, n);
   };
@@ -151,11 +174,13 @@ export default function MeasureEntry() {
             <input value={sval('weekKey')} onChange={(e) => patchSession({ weekKey: e.target.value })} placeholder="2026-W36" />
           </label>
           <label className="field">
-            <span>측정자</span>
+            <span>측정자 {nameMissing && <b style={{ color: 'var(--ng)' }}>· 필수</b>}</span>
             <input
+              id="sess-inspector"
               value={sval('inspector')}
               onChange={(e) => patchSession({ inspector: e.target.value })}
-              placeholder="이름"
+              placeholder="이름 (측정 전 필수)"
+              style={nameMissing ? { borderColor: 'var(--ng)' } : undefined}
             />
           </label>
         </div>
@@ -228,6 +253,8 @@ export default function MeasureEntry() {
               focusMarker={focusMarker}
               setFocusMarker={setFocusMarker}
               onInput={onInput}
+              nameMissing={nameMissing}
+              requireName={requireName}
             />
           </div>
         </div>
@@ -242,6 +269,8 @@ export default function MeasureEntry() {
             focusMarker={focusMarker}
             setFocusMarker={setFocusMarker}
             onInput={onInput}
+            nameMissing={nameMissing}
+            requireName={requireName}
           />
         </div>
       )}
@@ -256,7 +285,7 @@ export default function MeasureEntry() {
   );
 }
 
-function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker }) {
+function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker, nameMissing, requireName }) {
   const gauges = [...new Set(markers.map((m) => (m.gauge || '').trim()).filter(Boolean))];
   const units = [...new Set(markers.map((m) => m.unit || 'mm'))];
 
@@ -305,6 +334,8 @@ function MeasureTable({ markers, valueOf, onInput, focusMarker, setFocusMarker }
                       id={`mv-${m.id}`}
                       className={`right ${mvClass}`} style={{ width: 84 }}
                       value={v}
+                      readOnly={nameMissing}
+                      onFocus={requireName}
                       onChange={(n) => onInput(m.id, n)}
                       placeholder={m.nominal != null ? `${fmt(m.nominal)} 입력` : '측정값'}
                     />
