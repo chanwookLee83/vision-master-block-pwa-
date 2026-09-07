@@ -52,7 +52,7 @@ export default function ItemDetail() {
         ))}
       </div>
 
-      {tab === 'drawings' && <DrawingsTab itemId={itemId} />}
+      {tab === 'drawings' && <DrawingsTab itemId={itemId} onComplete={() => setTab('markers')} />}
       {tab === 'markers' && <MarkersTab itemId={itemId} />}
       {tab === 'sessions' && <SessionsTab itemId={itemId} />}
       {tab === 'history' && <HistoryTab itemId={itemId} />}

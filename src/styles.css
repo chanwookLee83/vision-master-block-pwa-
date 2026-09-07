@@ -299,6 +299,13 @@ tr.row-ng td.mv-cell { background: #fde7e6; }
   font-size: 14px; z-index: 100; box-shadow: var(--shadow);
 }
 
+.done-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  border-color: var(--brand); background: var(--brand-weak);
+}
+.done-bar .btn.primary { flex-shrink: 0; }
+
 .update-bar {
   position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
   width: min(460px, calc(100vw - 32px));

@@ -7,7 +7,7 @@ import { readDimensionFromRoi } from '../../lib/ocr.js';
 import { DEFAULT_UNITS, DEFAULT_GAUGES, mergeOptions, unitLabel } from '../../lib/units.js';
 import MarkerCanvas from '../../components/MarkerCanvas.jsx';
 
-export default function DrawingsTab({ itemId }) {
+export default function DrawingsTab({ itemId, onComplete }) {
   const toast = useToast();
   const fileRef = useRef(null);
   const [activeDrawing, setActiveDrawing] = useState(null);
@@ -210,6 +210,29 @@ export default function DrawingsTab({ itemId }) {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {markers.length > 0 && (
+        <div className="panel done-bar">
+          <div>
+            <b>번호 {markers.length}개 지정됨</b>
+            {(() => {
+              const missing = markers.filter((m) => m.nominal == null).length;
+              return missing > 0
+                ? <span className="muted"> · 기준치수 미입력 {missing}개 (나중에 치수표에서 입력 가능)</span>
+                : <span className="muted"> · 모든 번호에 기준치수 입력 완료</span>;
+            })()}
+          </div>
+          <button
+            className="btn primary"
+            onClick={() => {
+              toast('번호 지정을 저장했습니다');
+              onComplete?.();
+            }}
+          >
+            번호 지정 완료 → 치수표 확인
+          </button>
         </div>
       )}
     </>
