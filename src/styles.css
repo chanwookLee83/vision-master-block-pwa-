@@ -5,9 +5,9 @@
   --line-strong: #cfd4de;
   --text: #1c2330;
   --muted: #6b7280;
-  --brand: #37718e;          /* 차분한 스틸·청록 (기존 보라 #4f46e5 대체) */
+  --brand: #1146e7;          /* 차분한 스틸·청록 (기존 보라 #4f46e5 대체) */
   --brand-weak: #e9f1f4;
-  --brand-strong: #2c5b73;   /* 버튼 hover 등 진한 톤 */
+  --brand-strong: #0510a7;   /* 버튼 hover 등 진한 톤 */
   --ok: #0f9d58;
   --ok-bg: #e5f6ec;
   --ng: #d9342b;
