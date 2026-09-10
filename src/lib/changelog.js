@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.8.0';
+export const APP_VERSION = '1.8.1';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.8.1',
+    date: '2026-09-10',
+    items: [
+      'Cpk 탭에 “분석 기간” 선택 추가 (최근 4·8·13·26주 / 전체) — 한 달 이상 주별 데이터를 모아 계산',
+      '대상 세션 수 · 주차 · 날짜 범위 표시, 데이터 부족 시 안내',
+    ],
+  },
   {
     version: '1.8.0',
     date: '2026-09-10',
