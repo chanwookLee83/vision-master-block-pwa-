@@ -7,6 +7,7 @@ import {
 } from '../lib/fs.js';
 import { exportAll, downloadBackup, importAll } from '../lib/backup.js';
 import { hasAdminPassword, setAdminPassword, verifyAdminPassword, clearAdminPassword } from '../lib/admin.js';
+import { cpkCriteria, CPK_DEFAULTS } from '../lib/cpk.js';
 import { Crumbs, useToast } from '../components/ui.jsx';
 
 export default function Settings() {
@@ -23,12 +24,15 @@ export default function Settings() {
   const [pw1, setPw1] = useState('');
   const [pw2, setPw2] = useState('');
 
+  const [cpk, setCpk] = useState(CPK_DEFAULTS);
+
   async function refresh() {
     try {
       setDirName(await saveDirName());
       setGranted(!!(await getSaveDir()));
       setAutoSave(await getSetting('autoSave', false));
       setHasPw(await hasAdminPassword());
+      setCpk(cpkCriteria(await getSetting('cpk')));
     } catch (err) {
       console.error('설정 읽기 실패:', err);
       setStatus({ kind: 'err', text: `설정 읽기 오류: ${err.name || ''} ${err.message || err}` });
@@ -141,6 +145,14 @@ export default function Settings() {
     } else {
       toast('현재 비밀번호가 올바르지 않습니다');
     }
+  }
+
+  async function saveCpk() {
+    const c = cpkCriteria(cpk);
+    if (c.mid >= c.high) return toast('상 기준은 중 기준보다 커야 합니다');
+    await setSetting('cpk', c);
+    setCpk(c);
+    toast('Cpk 등급 기준을 저장했습니다');
   }
 
   async function onImport(e) {
@@ -256,6 +268,49 @@ export default function Settings() {
         <div className="btn-row" style={{ marginTop: 10 }}>
           <button className="btn primary sm" onClick={savePassword}>{hasPw ? '비밀번호 변경' : '비밀번호 설정'}</button>
           {hasPw && <button className="btn sm danger" onClick={removePassword}>비밀번호 해제</button>}
+        </div>
+      </div>
+
+      <div className="panel">
+        <h2>Cpk 등급 기준</h2>
+        <p className="hint">
+          품목의 <b>공정능력(Cpk)</b> 탭에서 치수별 Cpk 를 상 / 중 / 하로 나눌 기준입니다.
+          (일반적으로 상 = 1.33, 중 = 1.00)
+        </p>
+        <div className="grid cols-3" style={{ maxWidth: 560 }}>
+          <label className="field">
+            <span>상 (양호) 기준 · Cpk ≥</span>
+            <input
+              type="number" step="0.01" min="0"
+              value={cpk.high}
+              onChange={(e) => setCpk((c) => ({ ...c, high: e.target.value }))}
+            />
+          </label>
+          <label className="field">
+            <span>중 (주의) 기준 · Cpk ≥</span>
+            <input
+              type="number" step="0.01" min="0"
+              value={cpk.mid}
+              onChange={(e) => setCpk((c) => ({ ...c, mid: e.target.value }))}
+            />
+          </label>
+          <label className="field">
+            <span>최소 측정 횟수</span>
+            <input
+              type="number" step="1" min="2"
+              value={cpk.minN}
+              onChange={(e) => setCpk((c) => ({ ...c, minN: e.target.value }))}
+            />
+          </label>
+        </div>
+        <div className="btn-row" style={{ marginTop: 10 }}>
+          <button className="btn primary sm" onClick={saveCpk}>기준 저장</button>
+          <button
+            className="btn sm"
+            onClick={async () => { await setSetting('cpk', CPK_DEFAULTS); setCpk(CPK_DEFAULTS); toast('기본값으로 되돌렸습니다'); }}
+          >
+            기본값 (1.33 / 1.00 / 3)
+          </button>
         </div>
       </div>
 
