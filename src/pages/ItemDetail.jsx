@@ -8,13 +8,15 @@ import MarkersTab from './tabs/MarkersTab.jsx';
 import SessionsTab from './tabs/SessionsTab.jsx';
 import HistoryTab from './tabs/HistoryTab.jsx';
 import CpkTab from './tabs/CpkTab.jsx';
+import AppraiserTab from './tabs/AppraiserTab.jsx';
 
 const TABS = [
   ['drawings', '도면 · 번호 지정'],
   ['markers', '치수표'],
   ['sessions', '주간 측정'],
   ['history', '측정 이력'],
-  ['cpk', '공정능력(Cpk)']
+  ['cpk', '공정능력(Cpk)'],
+  ['appraiser', '측정자 비교']
 ];
 
 export default function ItemDetail() {
@@ -59,6 +61,7 @@ export default function ItemDetail() {
       {tab === 'sessions' && <SessionsTab itemId={itemId} />}
       {tab === 'history' && <HistoryTab itemId={itemId} />}
       {tab === 'cpk' && <CpkTab itemId={itemId} />}
+      {tab === 'appraiser' && <AppraiserTab itemId={itemId} />}
     </>
   );
 }

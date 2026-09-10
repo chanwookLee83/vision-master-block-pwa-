@@ -2,10 +2,19 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.8.1';
+export const APP_VERSION = '1.9.0';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.9.0',
+    date: '2026-09-10',
+    items: [
+      '“측정자 비교” 탭 추가 — 측정자 A·B 를 골라 치수별 평균 차이(공차 대비 %)와 일치/주의/불일치 판정',
+      '설정에 “측정자 비교 기준” 추가 (일치 ≤ 10% · 주의 ≤ 30% · 변경 가능)',
+      '측정자 이름 칸 포커스가 안 잡히던 문제 수정 (alert 제거)',
+    ],
+  },
   {
     version: '1.8.1',
     date: '2026-09-10',

@@ -8,6 +8,7 @@ import {
 import { exportAll, downloadBackup, importAll } from '../lib/backup.js';
 import { hasAdminPassword, setAdminPassword, verifyAdminPassword, clearAdminPassword } from '../lib/admin.js';
 import { cpkCriteria, CPK_DEFAULTS } from '../lib/cpk.js';
+import { appraiserCriteria, APPRAISER_DEFAULTS } from '../lib/appraiser.js';
 import { Crumbs, useToast } from '../components/ui.jsx';
 
 export default function Settings() {
@@ -25,6 +26,7 @@ export default function Settings() {
   const [pw2, setPw2] = useState('');
 
   const [cpk, setCpk] = useState(CPK_DEFAULTS);
+  const [appr, setAppr] = useState(APPRAISER_DEFAULTS);
 
   async function refresh() {
     try {
@@ -33,6 +35,7 @@ export default function Settings() {
       setAutoSave(await getSetting('autoSave', false));
       setHasPw(await hasAdminPassword());
       setCpk(cpkCriteria(await getSetting('cpk')));
+      setAppr(appraiserCriteria(await getSetting('appraiser')));
     } catch (err) {
       console.error('설정 읽기 실패:', err);
       setStatus({ kind: 'err', text: `설정 읽기 오류: ${err.name || ''} ${err.message || err}` });
@@ -153,6 +156,14 @@ export default function Settings() {
     await setSetting('cpk', c);
     setCpk(c);
     toast('Cpk 등급 기준을 저장했습니다');
+  }
+
+  async function saveAppr() {
+    const c = appraiserCriteria(appr);
+    if (c.warnPct >= c.failPct) return toast('주의 기준은 일치 기준보다 커야 합니다');
+    await setSetting('appraiser', c);
+    setAppr(c);
+    toast('측정자 비교 기준을 저장했습니다');
   }
 
   async function onImport(e) {
@@ -310,6 +321,41 @@ export default function Settings() {
             onClick={async () => { await setSetting('cpk', CPK_DEFAULTS); setCpk(CPK_DEFAULTS); toast('기본값으로 되돌렸습니다'); }}
           >
             기본값 (1.33 / 1.00 / 3)
+          </button>
+        </div>
+      </div>
+
+      <div className="panel">
+        <h2>측정자 비교 기준</h2>
+        <p className="hint">
+          품목의 <b>측정자 비교</b> 탭에서, 두 측정자의 평균 차이가 <b>공차 폭</b> 대비
+          몇 %일 때 일치 / 주의 / 불일치로 볼지 정합니다.
+        </p>
+        <div className="grid cols-2" style={{ maxWidth: 440 }}>
+          <label className="field">
+            <span>일치 기준 · 공차의 ≤ %</span>
+            <input
+              type="number" step="1" min="0"
+              value={appr.warnPct}
+              onChange={(e) => setAppr((c) => ({ ...c, warnPct: e.target.value }))}
+            />
+          </label>
+          <label className="field">
+            <span>주의 기준 · 공차의 ≤ %</span>
+            <input
+              type="number" step="1" min="0"
+              value={appr.failPct}
+              onChange={(e) => setAppr((c) => ({ ...c, failPct: e.target.value }))}
+            />
+          </label>
+        </div>
+        <div className="btn-row" style={{ marginTop: 10 }}>
+          <button className="btn primary sm" onClick={saveAppr}>기준 저장</button>
+          <button
+            className="btn sm"
+            onClick={async () => { await setSetting('appraiser', APPRAISER_DEFAULTS); setAppr(APPRAISER_DEFAULTS); toast('기본값으로 되돌렸습니다'); }}
+          >
+            기본값 (10% / 30%)
           </button>
         </div>
       </div>

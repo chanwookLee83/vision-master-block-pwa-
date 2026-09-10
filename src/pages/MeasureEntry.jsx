@@ -45,12 +45,12 @@ export default function MeasureEntry() {
     };
     const measured = markers.filter((m) => hasValue(m.id)).length;
 
-    // 측정자 이름이 비어 있으면 이름 칸부터 채우도록 유도
+    // 측정자 이름이 비어 있으면 이름 칸으로 유도 (부드럽게 — 방해하지 않음)
     if (!(session.inspector || '').trim()) {
       setTimeout(() => {
         const el = document.getElementById('sess-inspector');
-        if (el) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
-      }, 120);
+        if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); }
+      }, 200);
       toast('측정값 입력 전에 측정자 이름을 먼저 입력하세요');
       return;
     }
@@ -77,14 +77,19 @@ export default function MeasureEntry() {
     db.sessions.update(sid, patch);
   };
 
-  // 측정자 이름을 먼저 받는다 (누락 방지)
+  // 측정자 이름을 먼저 받는다 (누락 방지). 측정값 칸은 readOnly 로 이미 막혀 있으니
+  // 여기서는 alert 대신 가볍게 이름 칸으로 안내만 한다. (alert 를 focus 이벤트 안에서
+  // 쓰면 브라우저가 포커스를 되돌려 이름 칸이 안 잡히는 문제가 있었음)
   const nameMissing = !String(sval('inspector')).trim();
-  const requireName = (e) => {
+  const requireName = () => {
     if (!nameMissing) return true;
-    if (e && e.target && e.target.blur) e.target.blur();
-    window.alert('먼저 측정자의 이름을 입력하세요.');
+    toast('측정값 입력 전에 측정자 이름을 먼저 입력하세요');
     const el = document.getElementById('sess-inspector');
-    if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.focus(); }
+    if (el) {
+      el.scrollIntoView({ block: 'center' });
+      el.focus();
+      try { el.select(); } catch { /* noop */ }
+    }
     return false;
   };
 
