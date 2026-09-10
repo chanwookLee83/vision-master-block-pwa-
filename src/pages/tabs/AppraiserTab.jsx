@@ -6,6 +6,7 @@ import { tolText, fmt } from '../../lib/tol.js';
 import { Empty, useToast } from '../../components/ui.jsx';
 import { saveFile, safeName } from '../../lib/fs.js';
 import { compareAppraisers, appraiserCriteria, APPRAISER_GRADE_CLASS } from '../../lib/appraiser.js';
+import { appraiserReportHtml, openPrint } from '../../lib/report.js';
 
 export default function AppraiserTab({ itemId }) {
   const toast = useToast();
@@ -15,10 +16,11 @@ export default function AppraiserTab({ itemId }) {
   const item = useLiveQuery(() => db.items.get(itemId), [itemId]);
   const markers = useLiveQuery(() => db.markers.where('itemId').equals(itemId).sortBy('no'), [itemId]);
   const sessions = useLiveQuery(() => db.sessions.where('itemId').equals(itemId).toArray(), [itemId]);
+  const drawings = useLiveQuery(() => db.drawings.where('itemId').equals(itemId).sortBy('sort'), [itemId]);
   const readings = useLiveQuery(() => db.readings.toArray(), []);
   const setting = useLiveQuery(() => db.settings.get('appraiser'), []);
 
-  if (!item || !markers || !sessions || !readings) return null;
+  if (!item || !markers || !sessions || !drawings || !readings) return null;
 
   const crit = appraiserCriteria(setting?.value);
 
@@ -89,11 +91,21 @@ export default function AppraiserTab({ itemId }) {
       .then((res) => toast(res.target === 'folder' ? `${res.dir} 폴더에 저장했습니다` : 'CSV를 내려받았습니다'));
   }
 
+  function printReport() {
+    if (pickA === pickB) return toast('서로 다른 측정자를 선택하세요');
+    if (!openPrint(appraiserReportHtml(item, rows, pickA, pickB, crit, drawings))) {
+      toast('팝업이 차단되어 인쇄창을 열 수 없습니다');
+    }
+  }
+
   return (
     <div className="panel">
       <div className="btn-row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h2 style={{ margin: 0 }}>측정자 비교</h2>
-        <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
+        <div className="btn-row">
+          <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
+          <button className="btn sm" onClick={printReport}>인쇄 / PDF</button>
+        </div>
       </div>
 
       <div className="grid cols-2" style={{ maxWidth: 440, margin: '10px 0' }}>

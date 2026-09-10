@@ -6,6 +6,7 @@ import { tolText, fmt } from '../../lib/tol.js';
 import { Empty, useToast } from '../../components/ui.jsx';
 import { saveFile, safeName } from '../../lib/fs.js';
 import { cpkOf, cpkCriteria, GRADE_LABEL } from '../../lib/cpk.js';
+import { cpkReportHtml, openPrint } from '../../lib/report.js';
 
 const num = (v, d = 2) => (v == null || !isFinite(v) ? (v === Infinity ? '∞' : '-') : Number(v).toFixed(d));
 const gradeClass = { 상: 'pill-ok', 중: 'pill-wip', 하: 'pill-ng', 부족: '' };
@@ -26,10 +27,11 @@ export default function CpkTab({ itemId }) {
   const item = useLiveQuery(() => db.items.get(itemId), [itemId]);
   const markers = useLiveQuery(() => db.markers.where('itemId').equals(itemId).sortBy('no'), [itemId]);
   const sessions = useLiveQuery(() => db.sessions.where('itemId').equals(itemId).toArray(), [itemId]);
+  const drawings = useLiveQuery(() => db.drawings.where('itemId').equals(itemId).sortBy('sort'), [itemId]);
   const readings = useLiveQuery(() => db.readings.toArray(), []);
   const cpkSetting = useLiveQuery(() => db.settings.get('cpk'), []);
 
-  if (!item || !markers || !sessions || !readings) return null;
+  if (!item || !markers || !sessions || !drawings || !readings) return null;
   if (markers.length === 0) {
     return (
       <div className="panel">
@@ -99,11 +101,26 @@ export default function CpkTab({ itemId }) {
       .then((res) => toast(res.target === 'folder' ? `${res.dir} 폴더에 저장했습니다` : 'CSV를 내려받았습니다'));
   }
 
+  function printReport() {
+    const info = {
+      periodLabel: PERIODS.find(([k]) => k === period)?.[1] || period,
+      sessionCount: activeSessions.length,
+      dateSpan,
+      weeks,
+    };
+    if (!openPrint(cpkReportHtml(item, rows, crit, info, drawings))) {
+      toast('팝업이 차단되어 인쇄창을 열 수 없습니다');
+    }
+  }
+
   return (
     <div className="panel">
       <div className="btn-row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h2 style={{ margin: 0 }}>공정능력 (Cp / Cpk)</h2>
-        <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
+        <div className="btn-row">
+          <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
+          <button className="btn sm" onClick={printReport}>인쇄 / PDF</button>
+        </div>
       </div>
 
       <div className="btn-row" style={{ margin: '10px 0', alignItems: 'center' }}>

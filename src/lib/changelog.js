@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.9.0';
+export const APP_VERSION = '1.9.1';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.9.1',
+    date: '2026-09-10',
+    items: [
+      '공정능력(Cpk) · 측정자 비교 탭에 인쇄 / PDF 버튼 추가',
+      '측정자 비교 인쇄물에 도면 + 차이 나는 번호를 색으로 표시 (일치 초록 · 주의 노랑 · 불일치 빨강)',
+    ],
+  },
   {
     version: '1.9.0',
     date: '2026-09-10',

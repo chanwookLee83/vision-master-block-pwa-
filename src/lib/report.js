@@ -33,8 +33,9 @@ export function sessionCsv(item, session, markers, valueOf) {
   return csvBlob(lines);
 }
 
-// 성적서에 넣을 도면 이미지(+ 번호 마커) 블록
-function drawingsHtml(drawings, markers, statusOf) {
+// 성적서에 넣을 도면 이미지(+ 번호 마커) 블록.
+// markClassOf(marker) → '' | 'ok' | 'warn' | 'ng' (마커 색)
+function drawingsHtml(drawings, markers, markClassOf, heading = '도면') {
   if (!drawings || !drawings.length) return '';
   const blocks = drawings
     .filter((d) => d && d.dataUrl)
@@ -42,9 +43,8 @@ function drawingsHtml(drawings, markers, statusOf) {
       const dots = markers
         .filter((m) => m.drawingId === d.id)
         .map((m) => {
-          const j = statusOf ? statusOf(m) : null;
-          const cls = j === 'NG' ? ' ng' : j === 'OK' ? ' ok' : '';
-          return `<span class="mk${cls}" style="left:${(m.xr ?? 0) * 100}%;top:${(m.yr ?? 0) * 100}%">${esc(m.no)}</span>`;
+          const cls = (markClassOf ? markClassOf(m) : '') || '';
+          return `<span class="mk${cls ? ' ' + cls : ''}" style="left:${(m.xr ?? 0) * 100}%;top:${(m.yr ?? 0) * 100}%">${esc(m.no)}</span>`;
         })
         .join('');
       return `<figure class="dwg">
@@ -53,7 +53,7 @@ function drawingsHtml(drawings, markers, statusOf) {
       </figure>`;
     })
     .join('');
-  return blocks ? `<h2 class="dwg-h">도면</h2><div class="dwgs">${blocks}</div>` : '';
+  return blocks ? `<h2 class="dwg-h">${esc(heading)}</h2><div class="dwgs">${blocks}</div>` : '';
 }
 
 export function sessionReportHtml(item, session, markers, valueOf, drawings = []) {
@@ -80,9 +80,13 @@ export function sessionReportHtml(item, session, markers, valueOf, drawings = []
   const ngN = results.filter((r) => r === 'NG').length;
   const blankN = results.filter((r) => r === null).length;
 
+  const markCls = (m) => {
+    const j = judge(m, valueOf(m.id));
+    return j === 'NG' ? 'ng' : j === 'OK' ? 'ok' : '';
+  };
   const body = `
     <h1>주간 치수 측정 성적서</h1>
-    ${drawingsHtml(drawings, markers, (m) => judge(m, valueOf(m.id)))}
+    ${drawingsHtml(drawings, markers, markCls)}
     <table class="meta">
       <tr><th>품번</th><td>${esc(item.partNo || '-')}</td><th>호기</th><td>${esc(item.machineNo || '-')}</td></tr>
       <tr><th>품명</th><td>${esc(item.partName || '-')}</td><th>주차</th><td>${esc(session.weekKey || '-')}</td></tr>
@@ -160,6 +164,104 @@ export function historyReportHtml(item, markers, sessions, cellVal) {
   return printDoc(`측정이력_${item.partNo || ''}`, body);
 }
 
+// ---- 공정능력(Cpk) ----
+
+const n2 = (v, d = 2) =>
+  v == null || !isFinite(v) ? (v === Infinity ? '∞' : '-') : Number(v).toFixed(d);
+const gcls = { 상: 'ok', 일치: 'ok', 중: 'warn', 주의: 'warn', 하: 'ng', 불일치: 'ng' };
+
+// rows: [{ m, r }] (r = cpkOf 결과 또는 null), info: {periodLabel, sessionCount, dateSpan, weeks[]}
+export function cpkReportHtml(item, rows, crit, info = {}, drawings = []) {
+  const markers = rows.map((x) => x.m);
+  const gByMid = Object.fromEntries(rows.map((x) => [x.m.id, x.r?.grade]));
+  const cnt = (g) => rows.filter((x) => x.r && x.r.grade === g).length;
+
+  const tr = rows.map(({ m, r }) => {
+    if (!r) {
+      return `<tr><td>${m.no}</td><td>${esc(m.name || '-')}</td><td class="n" colspan="6">공차(기준치수) 없음</td></tr>`;
+    }
+    return `<tr class="${r.grade === '하' ? 'ng' : r.grade === '중' ? 'warn' : ''}">
+      <td>${m.no}</td><td>${esc(m.name || '-')}</td>
+      <td class="n">${fmt(r.lsl, 4)} ~ ${fmt(r.usl, 4)}</td>
+      <td class="n">${r.n}</td>
+      <td class="n">${r.mean == null ? '-' : fmt(r.mean, 4)}</td>
+      <td class="n">${r.sd == null ? '-' : fmt(r.sd, 5)}</td>
+      <td class="n">${n2(r.cp)}</td>
+      <td class="n b">${n2(r.cpk)}</td>
+      <td class="j g-${gcls[r.grade] || 'na'}">${r.grade === '부족' ? '데이터 부족' : r.grade}</td>
+    </tr>`;
+  }).join('');
+
+  const body = `
+    <h1>공정능력 (Cp / Cpk) 분석</h1>
+    ${drawingsHtml(drawings, markers, (m) => gcls[gByMid[m.id]] || '', '도면 (등급별 색상)')}
+    <p class="legend">마커 색 · <b class="ok">상</b> · <b class="warn">중</b> · <b class="ng">하</b> · 회색 데이터 부족</p>
+    <table class="meta">
+      <tr><th>품번</th><td>${esc(item.partNo || '-')}</td><th>품명</th><td>${esc(item.partName || '-')}</td><th>호기</th><td>${esc(item.machineNo || '-')}</td></tr>
+      <tr><th>분석 기간</th><td>${esc(info.periodLabel || '-')}</td><th>대상 측정</th><td>${esc(String(info.sessionCount ?? '-'))}회 · ${esc(info.dateSpan || '-')}</td></tr>
+      ${info.weeks && info.weeks.length ? `<tr><th>측정 주차</th><td colspan="3">${esc(info.weeks.join(', '))}</td></tr>` : ''}
+      <tr><th>등급 기준</th><td colspan="3">상 Cpk ≥ ${crit.high} · 중 Cpk ≥ ${crit.mid} · 최소 측정 ${crit.minN}회</td></tr>
+    </table>
+    <div class="summary">
+      <span class="ok">상 <b>${cnt('상')}</b></span>
+      <span class="warn" style="color:#a9711f">중 <b>${cnt('중')}</b></span>
+      <span class="ng">하 <b>${cnt('하')}</b></span>
+      <span>데이터 부족 <b>${cnt('부족')}</b></span>
+    </div>
+    <table class="data">
+      <thead><tr>
+        <th>No</th><th>치수 이름</th><th>규격 (LSL~USL)</th><th>측정</th><th>평균</th><th>σ</th><th>Cp</th><th>Cpk</th><th>등급</th>
+      </tr></thead>
+      <tbody>${tr}</tbody>
+    </table>
+    <p class="legend">Cpk = min[(USL−평균)/3σ, (평균−LSL)/3σ]. 신뢰할 만한 Cpk 는 보통 25회 이상 측정이 필요합니다.</p>`;
+  return printDoc(`공정능력_${item.partNo || ''}`, body);
+}
+
+// ---- 측정자 비교 ----
+
+// rows: [{ m, c }] (c = compareAppraisers 결과)
+export function appraiserReportHtml(item, rows, pickA, pickB, crit, drawings = []) {
+  const markers = rows.map((x) => x.m);
+  const gByMid = Object.fromEntries(rows.map((x) => [x.m.id, x.c?.grade]));
+  const cnt = (g) => rows.filter((x) => x.c && x.c.grade === g).length;
+  const diffRows = rows.filter((x) => x.c && (x.c.grade === '주의' || x.c.grade === '불일치'));
+
+  const tr = rows.map(({ m, c }) => `
+    <tr class="${c.grade === '불일치' ? 'ng' : c.grade === '주의' ? 'warn' : ''}">
+      <td>${m.no}</td><td>${esc(m.name || '-')}</td>
+      <td class="n">${esc(tolText(m))}</td>
+      <td class="n">${c.a.mean == null ? '-' : fmt(c.a.mean, 4)} (${c.a.n})</td>
+      <td class="n">${c.b.mean == null ? '-' : fmt(c.b.mean, 4)} (${c.b.n})</td>
+      <td class="n b">${c.diff == null ? '-' : (c.diff > 0 ? '+' : '') + fmt(c.diff, 4)}</td>
+      <td class="n">${c.pct == null ? '-' : c.pct.toFixed(1) + '%'}</td>
+      <td class="j g-${gcls[c.grade] || 'na'}">${c.grade}</td>
+    </tr>`).join('');
+
+  const body = `
+    <h1>측정자 비교 (재현성)</h1>
+    ${drawingsHtml(drawings, markers, (m) => gcls[gByMid[m.id]] || '', '도면 (차이 나는 번호 표시)')}
+    <p class="legend">마커 색 · <b class="ok">일치</b> · <b class="warn">주의</b> · <b class="ng">불일치</b></p>
+    <table class="meta">
+      <tr><th>품번</th><td>${esc(item.partNo || '-')}</td><th>품명</th><td>${esc(item.partName || '-')}</td><th>호기</th><td>${esc(item.machineNo || '-')}</td></tr>
+      <tr><th>측정자 A</th><td>${esc(pickA)}</td><th>측정자 B</th><td>${esc(pickB)}</td></tr>
+      <tr><th>판정 기준</th><td colspan="3">차이(|A−B|) ÷ 공차 폭 × 100 — 일치 ≤ ${crit.warnPct}% · 주의 ≤ ${crit.failPct}% · 초과 불일치</td></tr>
+    </table>
+    <div class="summary">
+      <span class="ok">일치 <b>${cnt('일치')}</b></span>
+      <span class="warn" style="color:#a9711f">주의 <b>${cnt('주의')}</b></span>
+      <span class="ng">불일치 <b>${cnt('불일치')}</b></span>
+    </div>
+    ${diffRows.length ? `<p class="legend"><b>차이 큰 번호:</b> ${diffRows.map((x) => `${x.m.no}번(${x.c.pct.toFixed(0)}%)`).join(', ')} — 측정 방법·기준점·계측기 사용법을 두 측정자가 맞춰 보세요.</p>` : ''}
+    <table class="data">
+      <thead><tr>
+        <th>No</th><th>치수 이름</th><th>공차</th><th>${esc(pickA)} 평균(n)</th><th>${esc(pickB)} 평균(n)</th><th>차이(A−B)</th><th>공차대비</th><th>판정</th>
+      </tr></thead>
+      <tbody>${tr}</tbody>
+    </table>`;
+  return printDoc(`측정자비교_${item.partNo || ''}`, body);
+}
+
 // ---- 공통 ----
 
 function printDoc(title, body) {
@@ -182,6 +284,12 @@ function printDoc(title, body) {
   tr.ok td.j { color:#1e7e34; }
   td.n.ng { background:#fdecea; color:#c0392b; font-weight:700; }
   td.n.ok { background:#eaf6ec; }
+  tr.warn td { background:#fef6e6; }
+  td.j.g-ok { color:#1e7e34; }
+  td.j.g-warn { color:#a9711f; }
+  td.j.g-ng { color:#c0392b; }
+  .legend { font-size:11px; color:#555; margin:2px 0 10px; }
+  .legend b.ok { color:#1e7e34; } .legend b.warn { color:#a9711f; } .legend b.ng { color:#c0392b; }
   .summary { display:flex; gap:16px; margin:8px 0 14px; font-size:13px; }
   .summary .ok b { color:#1e7e34; } .summary .ng b { color:#c0392b; }
   .summary .verdict { margin-left:auto; padding:2px 12px; border:1px solid #999; font-weight:700; }
@@ -197,7 +305,7 @@ function printDoc(title, body) {
   .mk { position:absolute; transform:translate(-50%,-50%); box-sizing:border-box;
         min-width:16px; height:16px; padding:0 3px; border-radius:8px; border:1px solid #fff;
         background:#37718e; color:#fff; font-size:9px; font-weight:700; line-height:14px; text-align:center; }
-  .mk.ng { background:#c0392b; } .mk.ok { background:#1e7e34; }
+  .mk.ng { background:#c0392b; } .mk.ok { background:#1e7e34; } .mk.warn { background:#d9931f; }
   @media print { body { margin:12mm; } @page { size:A4 landscape; margin:12mm; } }
 </style></head><body>
 ${body}
