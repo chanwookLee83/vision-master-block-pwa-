@@ -8,7 +8,8 @@ import { limitsOf, round6 } from './tol.js';
 //  n < minN     → 데이터 부족
 export const CPK_DEFAULTS = { high: 1.33, mid: 1.0, minN: 3 };
 
-export function cpkCriteria(s = {}) {
+export function cpkCriteria(s) {
+  s = s || {}; // getSetting() 은 값이 없으면 null 을 주므로(기본 파라미터로는 안 걸림) 방어
   const num = (v, d) => (v == null || v === '' || isNaN(Number(v)) ? d : Number(v));
   return {
     high: num(s.high, CPK_DEFAULTS.high),

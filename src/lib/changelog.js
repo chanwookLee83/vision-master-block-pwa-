@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.10.1';
+export const APP_VERSION = '1.10.2';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.10.2',
+    date: '2026-09-11',
+    items: [
+      '설정 화면에서 "설정 읽기 오류: Cannot read properties of null (reading \'high\')" 뜨던 문제 수정',
+      '(Cpk·측정자 비교 기준을 아직 한 번도 저장하지 않은 경우 기본값을 못 읽어오던 버그)',
+    ],
+  },
   {
     version: '1.10.1',
     date: '2026-09-11',

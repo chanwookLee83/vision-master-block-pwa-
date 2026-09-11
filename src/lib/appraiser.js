@@ -6,7 +6,8 @@ import { sampleStats } from './cpk.js';
 // 차이(|A평균 − B평균|)가 공차 폭의 몇 % 이하면 "일치" / "주의"인지.
 export const APPRAISER_DEFAULTS = { warnPct: 10, failPct: 30 };
 
-export function appraiserCriteria(s = {}) {
+export function appraiserCriteria(s) {
+  s = s || {}; // getSetting() 은 값이 없으면 null 을 주므로(기본 파라미터로는 안 걸림) 방어
   const n = (v, d) => (v == null || v === '' || isNaN(Number(v)) ? d : Number(v));
   return {
     warnPct: n(s.warnPct, APPRAISER_DEFAULTS.warnPct),
