@@ -218,6 +218,14 @@ export async function saveFile(filename, contents, type = 'application/octet-str
   return { ok: true, target: 'download' };
 }
 
+// 저장소가 브라우저의 "용량 부족 시 자동 정리" 대상에서 빠지도록 영구 저장 요청.
+// (권한 만료 자체는 못 막지만, vmb_fs/IndexedDB 가 통째로 지워지는 것은 막아준다)
+export async function requestPersistentStorage() {
+  try {
+    if (navigator.storage?.persist) await navigator.storage.persist();
+  } catch { /* 지원 안 하거나 거부되어도 무시 */ }
+}
+
 // 파일명에 못 쓰는 문자 정리
 export const safeName = (s) => (s || '').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'vmb';
 

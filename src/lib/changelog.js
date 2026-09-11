@@ -2,10 +2,19 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.10.0';
+export const APP_VERSION = '1.10.1';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.10.1',
+    date: '2026-09-11',
+    items: [
+      '앱 업데이트 · 브라우저 재시작 후 저장 폴더 “권한 필요” 상태를 어느 화면에서든 배너로 안내 + 한 번에 재연결',
+      '(폴더 지정 자체는 계속 유지됨 — 브라우저 보안 정책상 쓰기 권한만 초기화되는 것으로, 재선택은 불필요)',
+      '폴더 최초 지정 시 브라우저에 영구 저장(persist) 요청 — 저장소가 통째로 지워지는 사고 방지',
+    ],
+  },
   {
     version: '1.10.0',
     date: '2026-09-11',

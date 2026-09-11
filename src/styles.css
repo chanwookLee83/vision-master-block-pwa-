@@ -407,6 +407,9 @@ tr.row-ng td.mv-cell { background: #fde7e6; }
 .update-bar-list { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.55; }
 .update-bar-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
+/* 폴더 재연결 배너 — update-bar 와 동시에 떠도 겹치지 않게 위쪽에 고정 */
+.update-bar.reconnect-bar { top: 12px; bottom: auto; }
+
 .fab {
   position: fixed; right: 20px; bottom: 20px;
   background: var(--brand); color: #fff; border: none;

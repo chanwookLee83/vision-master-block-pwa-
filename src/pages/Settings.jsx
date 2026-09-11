@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { getSetting, setSetting } from '../lib/db.js';
 import {
   fsSupported, stashSaveDir, forgetSaveDir, getSaveDir, getSaveDirHandle,
-  saveDirName, writeToDir, ensurePermission, probeDir,
+  saveDirName, writeToDir, ensurePermission, probeDir, requestPersistentStorage,
 } from '../lib/fs.js';
 import { exportAll, downloadBackup, importAll } from '../lib/backup.js';
 import { hasAdminPassword, setAdminPassword, verifyAdminPassword, clearAdminPassword } from '../lib/admin.js';
@@ -97,6 +97,8 @@ export default function Settings() {
       setStatus({ kind: 'err', text: '폴더 정보가 저장되지 않았습니다 (IndexedDB vmb_fs). 브라우저 저장소 설정을 확인해 주세요.' });
       return;
     }
+
+    await requestPersistentStorage(); // 저장소가 브라우저에 의해 통째로 지워지는 것 방지(권한 만료는 별개)
 
     await refresh();
     setStatus({ kind: 'ok', text: `저장 폴더 지정됨: 📁 ${handle.name}` });
@@ -203,6 +205,13 @@ export default function Settings() {
         <p className="hint">
           지정한 폴더에 CSV·백업 파일을 직접 저장합니다. <b>네트워크 드라이브</b>(예: <code>Z:\\품질\\측정</code>)로
           연결된 <b>파일서버 폴더</b>를 선택하면 PC가 고장나도 데이터가 서버에 남습니다.
+        </p>
+        <p className="hint">
+          ⓘ 폴더 <b>지정 자체는 계속 유지</b>됩니다. 다만 브라우저 보안 정책상 <b>브라우저를 새로
+          시작하거나 앱을 업데이트해 새로고침</b>되면 그 폴더에 &ldquo;쓰기&rdquo; <b>권한만</b> 초기화되어
+          &ldquo;권한 필요&rdquo; 로 표시될 수 있습니다 — 폴더를 다시 고를 필요 없이 <b>&ldquo;권한 다시
+          요청&rdquo;</b> 한 번만 누르면 됩니다(측정 화면에서도 배너로 안내됩니다). 앱을 <b>PWA로
+          설치</b>해서 쓰면 이 권한이 더 오래 유지됩니다.
         </p>
 
         {!supported ? (
