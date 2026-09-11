@@ -7,6 +7,7 @@ import { Crumbs, useToast, DecimalInput, Modal } from '../components/ui.jsx';
 import { safeName, getSaveDir, writeToDir, dataUrlToBlob, download, fsSupported, listSaveDirFiles, readSaveDirFile, saveDirName } from '../lib/fs.js';
 import { makeZip } from '../lib/zip.js';
 import { sessionCsv, sessionReportHtml, openPrint } from '../lib/report.js';
+import { sendFileByEmail } from '../lib/mail.js';
 import { exportAll } from '../lib/backup.js';
 import MarkerCanvas from '../components/MarkerCanvas.jsx';
 
@@ -22,6 +23,7 @@ export default function MeasureEntry() {
   const [edits, setEdits] = useState({});
   const [sEdits, setSEdits] = useState({}); // 측정 정보(측정자·주차·비고 등) 낙관적 보관
   const [folderView, setFolderView] = useState(null); // null | {loading} | {files, dir}
+  const [mailOpen, setMailOpen] = useState(false);
 
   const item = useLiveQuery(() => db.items.get(itemId), [itemId]);
   const session = useLiveQuery(() => db.sessions.get(sid), [sid]);
@@ -168,6 +170,22 @@ export default function MeasureEntry() {
     if (!ok) toast('팝업이 차단되어 인쇄창을 열 수 없습니다');
   }
 
+  async function emailReport(kind) {
+    setMailOpen(false);
+    const to = await getSetting('reportEmail', '');
+    if (!to) {
+      toast('설정 > 등록 이메일을 먼저 등록하세요');
+      return;
+    }
+    const subject = `측정성적서 ${item.partNo || ''} ${session.weekKey || session.date || ''}`;
+    const blob = kind === 'html'
+      ? new Blob([sessionReportHtml(item, session, markers, valueOf, drawings)], { type: 'text/html' })
+      : sessionCsv(item, session, markers, valueOf);
+    const filename = `${baseName()}.${kind === 'html' ? 'html' : 'csv'}`;
+    sendFileByEmail({ to, subject, filename, blob });
+    toast(`${filename} 을 받았습니다 — 메일 앱에서 첨부해 보내주세요`);
+  }
+
   async function openFolder() {
     if (!fsSupported()) {
       toast('이 브라우저는 폴더 보기를 지원하지 않습니다. 저장한 파일은 브라우저 “다운로드” 폴더에 있습니다.');
@@ -282,6 +300,7 @@ export default function MeasureEntry() {
           <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
           {fsSupported() && <button className="btn sm" onClick={openFolder}>저장 폴더 보기</button>}
           <button className="btn sm" onClick={printReport}>인쇄 / PDF</button>
+          <button className="btn sm" onClick={() => setMailOpen(true)}>메일로 보내기</button>
         </div>
         {ngN > 0 && <p className="pill-ng" style={{ display: 'inline-block' }}>공차 이탈 {ngN}건 — 확인 필요</p>}
         {(() => {
@@ -363,8 +382,22 @@ export default function MeasureEntry() {
         <button className="btn" onClick={exportCsv}>CSV 저장</button>
         {fsSupported() && <button className="btn" onClick={openFolder}>저장 폴더 보기</button>}
         <button className="btn" onClick={printReport}>인쇄 / PDF</button>
+        <button className="btn" onClick={() => setMailOpen(true)}>메일로 보내기</button>
         <span className="muted">입력 즉시 자동 저장됩니다.</span>
       </div>
+
+      {mailOpen && (
+        <Modal title="메일로 보내기" onClose={() => setMailOpen(false)}>
+          <p className="hint" style={{ marginTop: 0 }}>
+            형식을 고르면 파일을 내려받고, 등록 이메일이 채워진 메일 작성창을 엽니다.
+            (첨부는 자동으로 되지 않으니 받은 파일을 메일에 직접 첨부해 보내주세요.)
+          </p>
+          <div className="btn-row">
+            <button className="btn primary sm" onClick={() => emailReport('csv')}>CSV로 보내기</button>
+            <button className="btn primary sm" onClick={() => emailReport('html')}>성적서(HTML)로 보내기</button>
+          </div>
+        </Modal>
+      )}
 
       {folderView && (
         <Modal

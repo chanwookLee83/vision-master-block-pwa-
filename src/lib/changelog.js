@@ -2,10 +2,18 @@
 // 새 버전을 낼 때: APP_VERSION 을 올리고 CHANGELOG 맨 앞에 항목을 추가한다.
 // (package.json 의 version 과 맞춰 두면 관리가 편하다)
 
-export const APP_VERSION = '1.9.1';
+export const APP_VERSION = '1.10.0';
 
 // 최신이 맨 위. items 는 한 줄짜리 짧은 문장으로.
 export const CHANGELOG = [
+  {
+    version: '1.10.0',
+    date: '2026-09-11',
+    items: [
+      '설정에 “등록 이메일” 추가 — 측정 화면 · 측정 이력 탭에 “메일로 보내기” 버튼 추가',
+      'CSV 또는 성적서(HTML)를 내려받은 뒤 등록 이메일이 채워진 메일 작성창을 바로 엶 (첨부는 직접)',
+    ],
+  },
   {
     version: '1.9.1',
     date: '2026-09-10',

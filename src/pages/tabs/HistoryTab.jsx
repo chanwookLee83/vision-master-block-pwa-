@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../lib/db.js';
+import { db, getSetting } from '../../lib/db.js';
 import { judge, limitsOf, tolText, fmt } from '../../lib/tol.js';
-import { Empty, useToast, CollapsePanel } from '../../components/ui.jsx';
+import { Empty, useToast, CollapsePanel, Modal } from '../../components/ui.jsx';
 import { saveFile, safeName } from '../../lib/fs.js';
 import { historyCsv, historyReportHtml, openPrint } from '../../lib/report.js';
+import { sendFileByEmail } from '../../lib/mail.js';
 
 export default function HistoryTab({ itemId }) {
   const toast = useToast();
+  const [mailOpen, setMailOpen] = useState(false);
   const item = useLiveQuery(() => db.items.get(itemId), [itemId]);
   const markers = useLiveQuery(() => db.markers.where('itemId').equals(itemId).sortBy('no'), [itemId]);
   const sessions = useLiveQuery(() => db.sessions.where('itemId').equals(itemId).sortBy('date'), [itemId]);
@@ -43,6 +46,23 @@ export default function HistoryTab({ itemId }) {
     }
   }
 
+  async function emailReport(kind) {
+    setMailOpen(false);
+    const to = await getSetting('reportEmail', '');
+    if (!to) {
+      toast('설정 > 등록 이메일을 먼저 등록하세요');
+      return;
+    }
+    const subject = `측정이력 ${item.partNo || ''}`;
+    const name = `측정이력_${safeName(item.partNo || 'item')}`;
+    const blob = kind === 'html'
+      ? new Blob([historyReportHtml(item, markers, sessions, cellVal)], { type: 'text/html' })
+      : historyCsv(item, markers, sessions, cellVal);
+    const filename = `${name}.${kind === 'html' ? 'html' : 'csv'}`;
+    sendFileByEmail({ to, subject, filename, blob });
+    toast(`${filename} 을 받았습니다 — 메일 앱에서 첨부해 보내주세요`);
+  }
+
   const sessionNg = (sid) =>
     markers.reduce((n, m) => n + (judge(markerById[m.id], cellVal(sid, m.id)) === 'NG' ? 1 : 0), 0);
 
@@ -60,6 +80,7 @@ export default function HistoryTab({ itemId }) {
         <div className="btn-row">
           <button className="btn sm" onClick={exportCsv}>CSV 저장</button>
           <button className="btn sm" onClick={printReport}>인쇄 / PDF</button>
+          <button className="btn sm" onClick={() => setMailOpen(true)}>메일로 보내기</button>
         </div>
       }
     >
@@ -115,6 +136,19 @@ export default function HistoryTab({ itemId }) {
           </tbody>
         </table>
       </div>
+
+      {mailOpen && (
+        <Modal title="메일로 보내기" onClose={() => setMailOpen(false)}>
+          <p className="hint" style={{ marginTop: 0 }}>
+            형식을 고르면 파일을 내려받고, 등록 이메일이 채워진 메일 작성창을 엽니다.
+            (첨부는 자동으로 되지 않으니 받은 파일을 메일에 직접 첨부해 보내주세요.)
+          </p>
+          <div className="btn-row">
+            <button className="btn primary sm" onClick={() => emailReport('csv')}>CSV로 보내기</button>
+            <button className="btn primary sm" onClick={() => emailReport('html')}>이력(HTML)로 보내기</button>
+          </div>
+        </Modal>
+      )}
     </CollapsePanel>
   );
 }

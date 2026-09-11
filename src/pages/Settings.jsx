@@ -20,6 +20,9 @@ export default function Settings() {
   const [status, setStatus] = useState(null); // { kind:'ok'|'err'|'info', text }
   const supported = fsSupported();
 
+  const [email, setEmail] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+
   const [hasPw, setHasPw] = useState(false);
   const [curPw, setCurPw] = useState('');
   const [pw1, setPw1] = useState('');
@@ -33,6 +36,9 @@ export default function Settings() {
       setDirName(await saveDirName());
       setGranted(!!(await getSaveDir()));
       setAutoSave(await getSetting('autoSave', false));
+      const em = await getSetting('reportEmail', '');
+      setEmail(em);
+      setEmailInput(em);
       setHasPw(await hasAdminPassword());
       setCpk(cpkCriteria(await getSetting('cpk')));
       setAppr(appraiserCriteria(await getSetting('appraiser')));
@@ -111,6 +117,14 @@ export default function Settings() {
     const v = e.target.checked;
     setAutoSave(v);
     await setSetting('autoSave', v);
+  }
+  async function saveEmail() {
+    const v = emailInput.trim();
+    if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast('이메일 형식이 올바르지 않습니다');
+    await setSetting('reportEmail', v);
+    setEmail(v);
+    setEmailInput(v);
+    toast(v ? '등록 이메일을 저장했습니다' : '등록 이메일을 지웠습니다');
   }
   async function backupNow() {
     const dump = await exportAll();
@@ -232,6 +246,28 @@ export default function Settings() {
             </label>
           </>
         )}
+
+        <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--line, #ddd)' }}>
+          <div className="field" style={{ marginBottom: 6 }}>
+            <span>등록 이메일</span>
+          </div>
+          <p className="hint" style={{ marginTop: 0 }}>
+            등록해두면 측정 화면·이력 탭의 <b>&ldquo;메일로 보내기&rdquo;</b> 버튼으로 CSV/성적서를
+            내려받은 뒤 이 주소로 보낼 메일 작성창을 바로 열어줍니다. (브라우저가 메일 서버를 갖고 있지
+            않아 <b>자동 첨부·전송은 되지 않으며</b>, 내려받은 파일을 메일에 직접 첨부해야 합니다.)
+          </p>
+          <div className="btn-row" style={{ alignItems: 'center' }}>
+            <input
+              type="email"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              placeholder="예: quality@company.com"
+              style={{ maxWidth: 280 }}
+            />
+            <button className="btn primary sm" onClick={saveEmail}>저장</button>
+            {email && <span className="pill-ok">등록됨</span>}
+          </div>
+        </div>
       </div>
 
       <div className="panel">
